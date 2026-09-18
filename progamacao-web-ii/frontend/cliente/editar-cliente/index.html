@@ -5,6 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1c1c1b">
   <title>Editar Cliente | S.C.A.C.I.</title>
+  <style>
+    .address-row {
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 18px;
+      align-items: end;
+    }
+    .spouse-field {
+      width: 67%;
+      padding-top: 6px;
+      gap: 10px;
+    }
+    .spouse-field[hidden] {
+      display: none;
+    }
+    .spouse-field label {
+      margin-top: 4px;
+    }
+    .civil-field {
+      width: 67%;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 1100px) {
+      .civil-field,
+      .spouse-field {
+        width: 100%;
+      }
+    }
+    @media (max-width: 760px) {
+      .address-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .civil-field,
+      .spouse-field {
+        width: 100%;
+      }
+    }
+  </style>
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
 </head>
@@ -38,15 +77,26 @@
           <div class="field"><label for="document">CPF ou CNPJ</label><input id="document" name="document" inputmode="numeric" required maxlength="18" aria-describedby="document-error"><span class="error" id="document-error"></span></div>
           <div class="field"><label for="birthDate">Data de Nascimento</label><input type="date" id="birthDate" name="birthDate" autocomplete="bday" required></div>
           <div class="field"><label for="phone">Telefone</label><input type="tel" id="phone" name="phone" autocomplete="tel-national" required maxlength="16"></div>
-          <div class="field"><label for="email">Email</label><input type="email" id="email" name="email" autocomplete="email" maxlength="100"></div>
+          <div class="field"><label for="email">Email</label><input type="email" id="email" name="email" autocomplete="email" required maxlength="100"></div>
           <div class="field postal-field"><label for="postalCode">CEP</label><input id="postalCode" name="postalCode" autocomplete="postal-code" inputmode="numeric" required maxlength="9" aria-describedby="postal-error"><span class="error" id="postal-error"></span></div>
           <div class="field"><label for="street">Logradouro</label><input id="street" name="street" autocomplete="address-line1" required maxlength="100"></div>
-          <div class="address-row"><div class="field"><label for="number">Nº</label><input id="number" name="number" required maxlength="10"></div><div class="field"><label for="neighborhood">Bairro</label><input id="neighborhood" name="neighborhood" required maxlength="100"></div></div>
+          <div class="address-row"><div class="field"><label for="number">Nº</label><input id="number" name="number" required maxlength="10"></div><div class="field"><label for="complement">Complemento</label><input id="complement" name="complement" maxlength="100" placeholder="Apartamento, bloco, casa"></div></div>
+          <div class="field"><label for="neighborhood">Bairro</label><input id="neighborhood" name="neighborhood" required maxlength="100"></div>
           <div class="city-row"><div class="field"><label for="city">Cidade</label><input id="city" name="city" autocomplete="address-level2" required maxlength="100"></div><div class="field"><label for="state">UF</label><select id="state" name="state" autocomplete="address-level1" required aria-label="UF"></select></div></div>
         </div>
         <div class="additional-fields">
-          <div class="field civil-field"><label for="maritalStatus">Estado civil</label><select id="maritalStatus" name="maritalStatus"><option>Solteiro</option><option>Casado</option><option>Divorciado</option><option>Viúvo</option></select></div>
-          <div class="field"><label for="proof">Comprovante de residência</label><div class="upload" id="drop-zone"><span id="file-name">comp_residencia .PDF</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M17 44a12 12 0 0 1-4-23 16 16 0 0 1 31-6 15 15 0 0 1 5 29M32 61V27m-10 10 10-10 10 10"/></svg><input type="file" id="proof" accept="application/pdf,image/png,image/jpeg" aria-describedby="file-help file-error"></div><small id="file-help">Clique ou arraste um PDF, PNG ou JPG (até 5 MB).</small><span class="error" id="file-error" role="alert"></span></div>
+          <div class="field civil-field"><label for="maritalStatus">Estado civil</label><select id="maritalStatus" name="maritalStatus" required><option value="">Selecione</option><option>Solteiro</option><option>Casado</option><option>Divorciado</option><option>Viúvo</option></select></div>
+          <div class="field spouse-field" id="spouse-field" hidden>
+            <div class="spouse-row"><div class="field"><label for="spouseName">Nome do cônjuge</label><input id="spouseName" name="spouseName" maxlength="100" placeholder="Nome completo do cônjuge"></div><div class="field"><label for="spouseDocument">CPF do cônjuge</label><input id="spouseDocument" name="spouseDocument" inputmode="numeric" maxlength="14" placeholder="000.000.000-00"></div></div>
+            <div class="spouse-row"><div class="field"><label for="spouseBirthDate">Data de nascimento do cônjuge</label><input type="date" id="spouseBirthDate" name="spouseBirthDate"></div><div class="field"><label for="spousePropertyRegime">Regime de bens</label><select id="spousePropertyRegime" name="spousePropertyRegime"><option value="">Selecione</option><option>Comunhão parcial de bens</option><option>Comunhão universal de bens</option><option>Separação total de bens</option><option>Participação final nos aquestos</option></select></div></div>
+            <div class="spouse-row"><div class="field"><label for="marriageDate">Data do casamento</label><input type="date" id="marriageDate" name="marriageDate"></div><div class="field"><label for="marriageActive">Casamento ativo</label><select id="marriageActive" name="marriageActive"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div></div>
+            <div class="field" id="marriage-end-date-field" hidden>
+              <label for="marriageEndDate">Data fim do casamento</label>
+              <input type="date" id="marriageEndDate" name="marriageEndDate">
+            </div>
+            <div class="field"><label for="unionProof">Comprovante de união</label><div class="upload" id="union-drop-zone"><span id="union-file-name">comprovante_uniao.PDF</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M17 44a12 12 0 0 1-4-23 16 16 0 0 1 31-6 15 15 0 0 1 5 29M32 61V27m-10 10 10-10 10 10"/></svg><input type="file" id="unionProof" accept="application/pdf,image/png,image/jpeg" aria-describedby="union-file-help union-file-error"></div><small id="union-file-help">Clique ou arraste um PDF, PNG ou JPG (até 5 MB).</small><span class="error" id="union-file-error" role="alert"></span></div>
+          </div>
+          <div class="field"><label for="proof">Comprovante de residência</label><div class="upload" id="drop-zone"><span id="file-name">comp_residencia .PDF</span><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M17 44a12 12 0 0 1-4-23 16 16 0 0 1 31-6 15 15 0 0 1 5 29M32 61V27m-10 10 10-10 10 10"/></svg><input type="file" id="proof" accept="application/pdf,image/png,image/jpeg" required aria-describedby="file-help file-error"></div><small id="file-help">Clique ou arraste um PDF, PNG ou JPG (até 5 MB).</small><span class="error" id="file-error" role="alert"></span></div>
           <div class="save-area"><p id="save-status" role="status" aria-live="polite"></p><button class="save-button" type="submit">Salvar edição</button></div>
         </div>
       </form>
@@ -55,3 +105,4 @@
   <dialog id="navigation-dialog" aria-labelledby="dialog-title"><h2 id="dialog-title">Módulo em desenvolvimento</h2><p id="navigation-message"></p><form method="dialog"><button class="save-button">Voltar à edição</button></form></dialog>
 </body>
 </html>
+
