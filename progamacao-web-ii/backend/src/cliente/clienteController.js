@@ -3,11 +3,11 @@ import prisma from "../database.js";
 /**
  * @author Matheus Pereira Rodrigues
  * 
- * Verifica se os campos obrigatórios (NOT NULL) do cliente foram devidamente preenchidos.
+ * Verifica se os campos obrigatórios (NOT NULL) do cliente foram devidamente preenchidos para o cadastro.
  * 
- * @param {Object} dados - Objeto contendo os dados do cliente a serem verificados.
- * @param {boolean} casado - boolean que verifica se cliente é casado (true) ou não (false).
- * @returns {Array} faltando - array contendo os nomes dos campos obrigatórios que não foram preenchidos.
+ * @param {Object} dados - Objeto contendo os dados do cliente e do cônjuge a serem verificados.
+ * @param {boolean} casado - Flag booleana indicando se o cliente possui estado civil "casado".
+ * @returns {Array<string>} Array contendo os nomes dos campos obrigatórios que não foram preenchidos.
  */
 function verificarDadosCliente(dados, casado) {
     const obrigatorios = [
@@ -35,8 +35,8 @@ function verificarDadosCliente(dados, casado) {
             "casamento_ativo"
         );
     }
-    
-     let faltando = [];
+
+    let faltando = [];
 
     for (const obrigatorio of obrigatorios) {
         const dado = dados[obrigatorio];
@@ -50,55 +50,98 @@ function verificarDadosCliente(dados, casado) {
 }
 
 /**
+ * @author Pedro Lucas Dos Santos Xavier
+ * 
+ * Valida os dados recebidos para a edição de um cliente.
+ * Garante que a requisição não esteja vazia e que nenhum campo venha em branco ou nulo.
+ * 
+ * @param {Object} dados - Objeto contendo os campos do cliente e cônjuge a serem atualizados (req.body).
+ * @returns {string|null} Retorna mensagem descritiva do erro ou null caso a validação seja bem-sucedida.
+ */
+function verificarDadosEdicaoCliente(dados) {
+    if (!dados || Object.keys(dados).length === 0) {
+        return "Forneça pelo menos um campo para atualizar";
+    }
+
+    for (const [campo, valor] of Object.entries(dados)) {
+        if (valor === null || valor === undefined || (typeof valor === 'string' && valor.trim() === '')) {
+            return `O campo ${campo} não pode ser vazio`;
+        }
+    }
+    return null;
+}
+
+/**
  * @author Matheus Pereira Rodrigues
  * 
- * Insere um novo cliente no banco de dados.
+ * Cadastra um novo cônjuge no banco de dados atrelado a um cliente dentro de um contexto transacional.
  * 
- * @param {Object} req - Objeto de requisição do Express (contém body).
+ * @param {Object} dados - Objeto contendo os dados do cônjuge a serem inseridos.
+ * @param {number} id_cliente - Chave primária do cliente proprietário do relacionamento.
+ * @param {Object} tx - Instância da transação do Prisma Client ($transaction).
+ * @returns {Promise<Object>} Retorna o registro do cônjuge criado.
+ */
+async function cadastrarConjuge(dados, id_cliente, tx = prisma) {
+    return await tx.conjuge.create({
+        data: {
+            cpf: dados.conjuge_cpf || dados.cpf,
+            nome: dados.conjuge_nome || dados.nome,
+            regime_bens: dados.regime_bens,
+            data_nascimento: (dados.conjuge_data_nascimento || dados.data_nascimento) ? new Date(dados.conjuge_data_nascimento || dados.data_nascimento) : null,
+            url_comprovante_uniao: dados.url_comprovante_uniao,
+            data_casamento: new Date(dados.data_casamento),
+            casamento_ativo: dados.casamento_ativo || "sim",
+            data_fim_casamento: dados.data_fim_casamento ? new Date(dados.data_fim_casamento) : null,
+            id_cliente: id_cliente
+        }
+    });
+}
+
+/**
+ * @author Matheus Pereira Rodrigues
+ * 
+ * Insere um novo cliente no banco de dados e, se aplicável, cadastra seu cônjuge inicial em uma transação atômica.
+ * 
+ * @param {Object} req - Objeto de requisição do Express (espera `req.body`).
  * @param {Object} res - Objeto de resposta do Express.
- * @returns {Object} Retorna o cliente inserido ou uma mensagem de erro.
+ * @returns {Promise<Object>} Retorna o status HTTP e os dados do cliente criado com o histórico de cônjuges.
  */
 async function cadastrarCliente(req, res) {
     const dados = req.body;
 
-    let casado = false;
-    if (dados.estado_civil === "casado") {
-        casado = true;
-    }
+    let casado = (dados.estado_civil === "casado");
 
     let faltando = verificarDadosCliente(dados, casado);
 
-    if (faltando.length === 0) {
+    if (faltando.length > 0) {
+        return res.status(400).json({ erro: `Preencha todos os campos obrigatórios! (${faltando.join(", ")})` });
+    }
 
-        try {
+    try {
+        const clienteCpfExistente = await prisma.cliente.findUnique({
+            where: { cpf_cnpj: dados.cpf_cnpj }
+        });
 
-            const clienteCpfExistente = await prisma.cliente.findUnique({
-                where: {
-                    cpf_cnpj: dados.cpf_cnpj
-                }
+        if (clienteCpfExistente) {
+            return res.status(400).json({ erro: 'Existe um cliente cadastrado com esses dados!' });
+        }
+
+        if (dados.email != null) {
+            const clienteEmailExistente = await prisma.cliente.findUnique({
+                where: { email: dados.email }
             });
 
-            if (clienteCpfExistente) {
-                return res.status(400).json({erro: 'Existe um cliente cadastrado com esses dados!'});
+            if (clienteEmailExistente) {
+                return res.status(400).json({ erro: 'Existe um cliente cadastrado com esses dados!' });
             }
+        }
 
-            if (dados.email != null) {
-                const clienteEmailExistente = await prisma.cliente.findUnique({
-                    where: {
-                        email: dados.email
-                    }
-                })
-
-                if (clienteEmailExistente) {
-                    return res.status(400).json({erro: 'Existe um cliente cadastrado com esses dados!'});
-                }
-            }
-
-            const cliente = await prisma.cliente.create({
+        const resultado = await prisma.$transaction(async (tx) => {
+            const cliente = await tx.cliente.create({
                 data: {
                     nome: dados.nome,
                     cpf_cnpj: dados.cpf_cnpj,
-                    data_nascimento: dados.data_nascimento,
+                    data_nascimento: new Date(dados.data_nascimento),
                     telefone: dados.telefone,
                     email: dados.email,
                     url_comprovante_residencia: dados.url_comprovante_residencia,
@@ -113,107 +156,216 @@ async function cadastrarCliente(req, res) {
                 }
             });
 
-            const id_cliente = cliente.id_cliente;
-
             if (casado) {
-                await cadastrarConjuge(dados, id_cliente);
+                await cadastrarConjuge(dados, cliente.id_cliente, tx);
             }
 
-            return res.status(200).json({cliente});
+            return await tx.cliente.findUnique({
+                where: { id_cliente: cliente.id_cliente },
+                include: {
+                    conjuge: {
+                        orderBy: { data_casamento: 'desc' }
+                    }
+                }
+            });
+        });
 
-        } catch (error) {
-             return res.status(500).json({ erro: 'Erro ao inserir no banco', detalhes: error.message });
-        }
+        return res.status(200).json({ cliente: resultado });
 
-    } else {
-        return res.status(400).json({erro: `Preencha todos os campos obrigatórios! (${faltando.join(", ")})`});
+    } catch (error) {
+        return res.status(500).json({ erro: 'Erro ao inserir no banco', detalhes: error.message });
     }
-}
-
-/**
- * @author Matheus Pereira Rodrigues
- * 
- * Cadastra um cônjuge no banco de dados. 
- *  
- * @param {Object} dados - Objeto contendo os dados do cônjuge a serem inseridos. 
- * @param {number} id_cliente -  ID do cliente ao qual o cônjuge está vinculado.
- */
-async function cadastrarConjuge(dados, id_cliente) {
-
-    await prisma.conjuge.create({
-        data: {
-            cpf: dados.conjuge_cpf,
-            nome: dados.conjuge_nome,
-            regime_bens: dados.regime_bens,
-            data_nascimento: dados.conjuge_data_nascimento,
-            url_comprovante_uniao: dados.url_comprovante_uniao,
-            data_casamento: dados.data_casamento,
-            casamento_ativo: dados.casamento_ativo,
-            data_fim_casamento: dados.data_fim_casamento,
-            id_cliente: id_cliente
-         }
-    });
 }
 
 /**
  * @author Pedro Lucas Dos Santos Xavier
- * Valida os dados recebidos para a edição de um cliente. Garantindo que a requisição não esteja vazia e que nenhum campo venha em branco ou nulo.
- * @param {Object} dados - Objeto contendo os campos do cliente a serem atualizados (req.body).
- * @returns {string|null} Retorna uma mensagem de erro em texto caso haja problema, ou null se estiver válido.
+ * 
+ * Busca um cliente pelo ID e retorna suas informações cadastrais acompanhadas 
+ * do histórico de cônjuges ordenado do mais recente para o mais antigo.
+ * 
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna o cliente com array de cônjuges ou mensagem de erro.
  */
-function verificarDadosEdicaoCliente(dados){
-    if(!dados|| Object.keys(dados).length === 0){
-        return "Forneça pelo menos um campo para atualizar"
-    }else{
-        for(const[campo,valor]of Object.entries(dados)){
-            if(valor=== null|| valor=== undefined||(typeof valor ==='string' && valor.trim()==='')){
-                return `o campo ${campo} não pode ser vazio`
-            }
-        }
+async function buscarClientePorId(req, res) {
+    const id = Number(req.params.id || req.params.id_cliente);
+
+    if (isNaN(id)) {
+        return res.status(400).json({ mensagem: "O ID fornecido deve ser um número válido." });
     }
-    return null
+
+    try {
+        const cliente = await prisma.cliente.findUnique({
+            where: { id_cliente: id },
+            include: {
+                conjuge: {
+                    orderBy: { data_casamento: 'desc' }
+                }
+            }
+        });
+
+        if (!cliente) {
+            return res.status(404).json({ mensagem: "Cliente não encontrado." });
+        }
+
+        return res.status(200).json(cliente);
+    } catch (error) {
+        return res.status(500).json({ erro: "Erro ao buscar cliente.", detalhes: error.message });
+    }
 }
 
 /**
- * @author Pedro Lucas Dos Santos Xavier 
- * Atualiza os dados de um cliente existente.
- * @param {Object} req - Objeto de requisição do Express (contém params e body).
+ * @author Pedro Lucas Dos Santos Xavier
+ * 
+ * Atualiza os dados de um cliente existente e gerencia as regras de negócio de estado civil e cônjuges:
+ * - Se alterado para Divorciado: Inativa o cônjuge atual preenchendo a data_fim_casamento sem excluir o histórico.
+ * - Se alterado/mantido para Casado:
+ *    a) Mesmo CPF: Atualiza as informações do cônjuge existente.
+ *    b) CPF Diferente: Inativa casamentos anteriores e registra o novo cônjuge (Novo Casamento).
+ * 
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id` e `req.body`).
  * @param {Object} res - Objeto de resposta do Express.
- * @returns {Object} Retorna o cliente atualizado ou uma mensagem de erro.
+ * @returns {Promise<Object>} Retorna o cliente atualizado com o histórico completo de cônjuges.
  */
-async function editarCliente(req,res){
-const{id}=req.params;
-const dadosAtuais= req.body;
-if (isNaN(Number(id))) {
+async function editarCliente(req, res) {
+    const id = Number(req.params.id || req.params.id_cliente);
+
+    if (isNaN(id)) {
         return res.status(400).json({ mensagem: "O ID fornecido deve ser um número válido." });
     }
-const erro=verificarDadosEdicaoCliente(dadosAtuais);
-if(erro){
-    return res.status(400).json({mensagem: erro});
-}
-try{
-    const clienteAtualizado= await prisma.cliente.update({
-        where: {id_cliente: Number(id)},
-        data: dadosAtuais
-    });
-    return res.status(200).json(clienteAtualizado);
-}catch (error) {
-    return res.status(500).json({ erro: 'Erro ao atualizar no banco', detalhes: error.message });
-  }
-}
 
+    const dadosAtuais = req.body;
+
+    const erro = verificarDadosEdicaoCliente(dadosAtuais);
+    if (erro) {
+        return res.status(400).json({ mensagem: erro });
+    }
+
+    // Separa os dados do cônjuge das propriedades do cliente
+    const { conjuge, ...dadosCliente } = dadosAtuais;
+
+    // Tratamento de conversão de datas para os campos do cliente
+    if (dadosCliente.data_nascimento) {
+        dadosCliente.data_nascimento = new Date(dadosCliente.data_nascimento);
+    }
+
+    try {
+        const clienteAtualizado = await prisma.$transaction(async (tx) => {
+
+            // 1. Atualiza dados cadastrais do cliente
+            if (Object.keys(dadosCliente).length > 0) {
+                await tx.cliente.update({
+                    where: { id_cliente: id },
+                    data: dadosCliente
+                });
+            }
+
+            // 2. REGRA DE NEGÓCIO: Divórcio
+            if (dadosCliente.estado_civil === "divorciado") {
+                const conjugeAtivo = await tx.conjuge.findFirst({
+                    where: { id_cliente: id, casamento_ativo: "sim" }
+                });
+
+                if (conjugeAtivo) {
+                    const dataFim = (conjuge && conjuge.data_fim_casamento) 
+                        ? new Date(conjuge.data_fim_casamento) 
+                        : new Date();
+
+                    await tx.conjuge.update({
+                        where: {
+                            id_cliente_cpf: { id_cliente: id, cpf: conjugeAtivo.cpf }
+                        },
+                        data: {
+                            casamento_ativo: "nao",
+                            data_fim_casamento: dataFim
+                        }
+                    });
+                }
+            }
+
+            // 3. REGRA DE NEGÓCIO: Edição ou Novo Cadastro de Cônjuge
+            if (conjuge && (conjuge.cpf || conjuge.conjuge_cpf)) {
+                const cpfConjuge = conjuge.cpf || conjuge.conjuge_cpf;
+
+                const conjugeExistente = await tx.conjuge.findFirst({
+                    where: { id_cliente: id, cpf: cpfConjuge }
+                });
+
+                if (conjugeExistente) {
+                    // Edição do cônjuge existente
+                    await tx.conjuge.update({
+                        where: { id_cliente_cpf: { id_cliente: id, cpf: cpfConjuge } },
+                        data: {
+                            nome: conjuge.nome || conjuge.conjuge_nome || conjugeExistente.nome,
+                            regime_bens: conjuge.regime_bens || conjugeExistente.regime_bens,
+                            url_comprovante_uniao: conjuge.url_comprovante_uniao || conjugeExistente.url_comprovante_uniao,
+                            data_nascimento: conjuge.data_nascimento ? new Date(conjuge.data_nascimento) : undefined,
+                            data_casamento: conjuge.data_casamento ? new Date(conjuge.data_casamento) : undefined,
+                            casamento_ativo: conjuge.casamento_ativo || conjugeExistente.casamento_ativo,
+                            data_fim_casamento: conjuge.data_fim_casamento ? new Date(conjuge.data_fim_casamento) : undefined
+                        }
+                    });
+                } else {
+                    // Novo casamento: Inativa o casamento anterior e insere o novo
+                    await tx.conjuge.updateMany({
+                        where: { id_cliente: id, casamento_ativo: "sim" },
+                        data: { 
+                            casamento_ativo: "nao", 
+                            data_fim_casamento: conjuge.data_casamento ? new Date(conjuge.data_casamento) : new Date() 
+                        }
+                    });
+
+                    await tx.conjuge.create({
+                        data: {
+                            id_cliente: id,
+                            cpf: cpfConjuge,
+                            nome: conjuge.nome || conjuge.conjuge_nome,
+                            regime_bens: conjuge.regime_bens,
+                            data_nascimento: conjuge.data_nascimento ? new Date(conjuge.data_nascimento) : null,
+                            url_comprovante_uniao: conjuge.url_comprovante_uniao,
+                            data_casamento: new Date(conjuge.data_casamento),
+                            casamento_ativo: "sim"
+                        }
+                    });
+                }
+            }
+
+            // 4. Retorna o cliente atualizado trazendo a lista de cônjuges ordenada
+            return await tx.cliente.findUnique({
+                where: { id_cliente: id },
+                include: {
+                    conjuge: {
+                        orderBy: { data_casamento: 'desc' }
+                    }
+                }
+            });
+        });
+
+        return res.status(200).json(clienteAtualizado);
+
+    } catch (error) {
+        if (error.code === 'P2025') {
+            return res.status(404).json({ erro: 'Cliente não encontrado.' });
+        }
+        return res.status(500).json({ erro: 'Erro ao atualizar no banco', detalhes: error.message });
+    }
+}
 
 /**
  * @author Matheus Pereira Rodrigues
  * 
- * Exclui um cliente do banco de dados.
+ * Exclui um cliente do banco de dados pelo seu ID.
  * 
- * @param {Object} req - Objeto de requisição do Express (contém params).
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id_cliente` ou `req.params.id`).
  * @param {Object} res - Objeto de resposta do Express.
- * @returns {Object} Retorna mensagem de êxito ou uma mensagem de erro.
+ * @returns {Promise<Object>} Retorna mensagem de sucesso ou mensagem de erro.
  */
 async function excluirCliente(req, res) {
-    const id = Number(req.params.id_cliente);
+    const id = Number(req.params.id_cliente || req.params.id);
+
+    if (isNaN(id)) {
+        return res.status(400).json({ erro: "O ID fornecido deve ser um número válido." });
+    }
 
     try {
         await prisma.cliente.delete({
@@ -222,12 +374,11 @@ async function excluirCliente(req, res) {
             }
         });
 
-        return res.status(200).json({mensagem: 'Cliente excluído com sucesso!'});
+        return res.status(200).json({ mensagem: 'Cliente excluído com sucesso!' });
 
     } catch (error) {
-        return res.status(400).json({erro: 'Erro ao excluir o cliente!'});
+        return res.status(400).json({ erro: 'Erro ao excluir o cliente!' });
     }
-
 }
 
-export { cadastrarCliente, editarCliente, excluirCliente };
+export { cadastrarCliente, buscarClientePorId, editarCliente, excluirCliente };

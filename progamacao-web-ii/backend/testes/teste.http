@@ -1,66 +1,54 @@
-### Teste 1: cadastrar cliente (Sucesso)
+### Teste 1: Cadastrar cliente (Sucesso)
 POST http://localhost:3000/cliente
 Content-Type: application/json
 
 {
-"nome": "Pedro Xavier",
-"cpf_cnpj": "11111111111",
-"data_nascimento": "2000-05-15T00:00:00.000Z",
-"telefone": "77999999999",
-"email": "pedro1111111@email.com",
-"url_comprovante_residencia": "https://exemplo.com/comprovante.pdf",
-"logradouro": "Rua A",
-"numero": "100",
-"bairro": "Centro",
-"complemento": "Casa",
-"cidade": "Poções",
-"uf": "BA",
-"cep": "45260000",
-"estado_civil": "solteiro"
+  "nome": "Pedro Xavier",
+  "cpf_cnpj": "11111111111",
+  "data_nascimento": "2000-05-15T00:00:00.000Z",
+  "telefone": "77999999999",
+  "email": "pedro1111111@email.com",
+  "url_comprovante_residencia": "https://exemplo.com/comprovante.pdf",
+  "logradouro": "Rua A",
+  "numero": "100",
+  "bairro": "Centro",
+  "complemento": "Casa",
+  "cidade": "Poções",
+  "uf": "BA",
+  "cep": "45260000",
+  "estado_civil": "solteiro"
 }
 
-### Teste 82: Excluir cliente - Sucesso
-
+### Teste 2: Excluir cliente - Sucesso
 DELETE http://localhost:3000/cliente/21
 
 ### Teste 3: Excluir cliente - ID inexistente
-
 DELETE http://localhost:3000/cliente/999999
 
 ### Teste 4: Excluir cliente - ID não numérico
-
 DELETE http://localhost:3000/cliente/abc
 
-
-
-
-
-
-
-###Teste 5: Atualizar cliente - Sucesso
-
+### Teste 5: Atualizar cliente - Sucesso
 PUT http://localhost:3000/cliente/21
 Content-Type: application/json
 
 {
-"nome": "Pedro Xavier Atualizado",
-"telefone": "77999999998"
+  "nome": "Pedro Xavier Atualizado",
+  "telefone": "77999999998"
 }
 
 ### Teste 6: Atualizar cliente - ID não numérico
-
 PUT http://localhost:3000/cliente/abc
 Content-Type: application/json
 
 {
-"nome": "Pedro"
+  "nome": "Pedro"
 }
 
 ### Teste 7: Atualizar cliente - Campo vazio
-
 PUT http://localhost:3000/cliente/21
 Content-Type: application/json
 
 {
-"nome": " "
+  "nome": " "
 }
