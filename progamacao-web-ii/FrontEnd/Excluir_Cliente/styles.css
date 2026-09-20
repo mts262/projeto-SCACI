@@ -1,0 +1,408 @@
+:root {
+  color-scheme: dark;
+  --page: #121212;
+  --panel: #181818;
+  --field: #2d2d2d;
+  --text: #eee;
+  --placeholder: #888;
+  --blue: #5b9bd5;
+  --gold: #e4bb5e;
+  --danger: #e05c5c;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--page);
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 400;
+  margin: 0 0 24px;
+}
+
+h1 span {
+  color: var(--blue);
+}
+
+/* Header & Sidebar */
+.brand {
+  height: 80px;
+  padding: 20px;
+  font: 28px Georgia, serif;
+  color: var(--blue);
+}
+
+.brand span:last-child {
+  color: var(--gold);
+}
+
+.sidebar {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  width: 200px;
+  padding: 8px;
+}
+
+.menu-title {
+  color: var(--gold);
+  font-size: 14px;
+  margin: 10px 16px 24px;
+}
+
+.sidebar nav {
+  display: grid;
+  gap: 4px;
+}
+
+.sidebar button {
+  border: 0;
+  text-align: left;
+  background: transparent;
+  color: #ccc;
+  font-size: 14px;
+  border-radius: 4px;
+  padding: 8px 16px;
+}
+
+.sidebar button:hover,
+.sidebar button[aria-current] {
+  background: #282828;
+}
+
+/* Main Content Layout */
+main {
+  margin-left: 200px;
+  background: var(--panel);
+  min-height: calc(100vh - 80px);
+  border-radius: 12px 0 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.breadcrumb {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #282828;
+  padding: 0 24px;
+  color: #777;
+  font-size: 13px;
+}
+
+.breadcrumb svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.breadcrumb ol {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  gap: 8px;
+}
+
+.breadcrumb li + li:before {
+  content: "/";
+  margin-right: 8px;
+}
+
+.breadcrumb li:first-child {
+  color: #aaa;
+}
+
+.content {
+  padding: 32px 48px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Campos (somente leitura) */
+.form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 630px;
+  width: 100%;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.field label,
+.field-label {
+  font-size: 12px;
+  color: var(--placeholder);
+  margin-bottom: 6px;
+}
+
+input {
+  width: 100%;
+  background: var(--field);
+  color: var(--text);
+  border: 1px solid #3d3d3d;
+  border-radius: 4px;
+  height: 42px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+input[readonly] {
+  cursor: default;
+}
+
+input[readonly]:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+/* Seta do "select" simulado */
+.readonly-select {
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+/* Ícone de calendário */
+.date-field .calendar-icon {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  width: 18px;
+  height: 18px;
+  color: var(--placeholder);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.date-field input {
+  padding-left: 38px;
+}
+
+/* Linhas em grid */
+.cep-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 12px;
+}
+
+.address-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 12px;
+}
+
+.city-row {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 12px;
+}
+
+.civil-field {
+  width: 45%;
+}
+
+/* Comprovante (estático) */
+.upload {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--field);
+  border: 1px solid #3d3d3d;
+  border-radius: 4px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.upload svg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  stroke: var(--blue);
+  fill: none;
+}
+
+.upload.is-static {
+  cursor: default;
+}
+
+/* Área de ação */
+.save-area {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.delete-button {
+  border: 1px solid #555;
+  background: transparent;
+  color: #fff;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.delete-button:hover {
+  background: #222;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+#status-exclusao {
+  font-size: 13px;
+  color: #b2ddbc;
+  margin-bottom: 8px;
+}
+
+#status-exclusao:empty {
+  display: none;
+}
+
+/* Modal de confirmação */
+dialog {
+  background: #202020;
+  color: var(--text);
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 420px;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, .7);
+}
+
+#modal-exclusao {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+#modal-exclusao[open] {
+  display: flex;
+}
+
+#modal-exclusao h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+#modal-exclusao p {
+  font-size: 13px;
+  color: var(--placeholder);
+  margin: 0;
+}
+
+.modal-icon svg {
+  width: 40px;
+  height: 40px;
+  color: var(--gold);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.modal-actions button {
+  border-radius: 999px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-nao {
+  background: transparent;
+  border: 1px solid #555;
+  color: var(--text);
+}
+
+.btn-nao:hover {
+  border-color: #888;
+}
+
+.btn-confirmar {
+  background: var(--danger);
+  border: 1px solid var(--danger);
+  color: #fff;
+}
+
+.btn-confirmar:hover {
+  background: #c94c4c;
+}
+
+.btn-confirmar:disabled {
+  opacity: .6;
+  cursor: default;
+}
+
+/* Responsivo */
+@media (max-width: 760px) {
+  .sidebar {
+    position: static;
+    width: auto;
+  }
+
+  .sidebar nav {
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+  }
+
+  main {
+    margin-left: 0;
+    border-radius: 0;
+  }
+
+  .content {
+    padding: 24px 16px;
+  }
+
+  .cep-row,
+  .address-row,
+  .city-row {
+    grid-template-columns: 1fr;
+  }
+
+  .civil-field {
+    width: 100%;
+  }
+}

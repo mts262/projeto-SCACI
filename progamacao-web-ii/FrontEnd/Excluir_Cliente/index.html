@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1c1c1b">
+  <title>Excluir Cliente | S.C.A.C.I.</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="brand" aria-label="S.C.A.C.I."><span>S.C.A.</span><span>C.I.</span></header>
+  <aside class="sidebar" aria-label="Menu principal">
+    <p class="menu-title">Menu</p>
+    <nav>
+      <button type="button" data-section="Início">Início</button>
+      <button type="button" aria-current="page" data-section="Clientes">Clientes</button>
+      <button type="button" data-section="Compradores">Compradores</button>
+      <button type="button" data-section="Imóveis">Imóveis</button>
+      <button type="button" data-section="Vendas">Vendas</button>
+      <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
+      <button type="button" data-section="Funcionários">Funcionários</button>
+      <button type="button" data-section="Corretores">Corretores</button>
+    </nav>
+  </aside>
+  <main id="conteudo" tabindex="-1">
+    <nav class="breadcrumb" aria-label="Localização">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v11h-6v-7H9v7H3Z"/></svg>
+      <span class="chevron" aria-hidden="true">‹</span>
+      <ol><li>Início</li><li>Clientes</li><li aria-current="page">Excluir</li></ol>
+    </nav>
+    <section class="content" aria-labelledby="page-title">
+      <h1 id="page-title">Excluir <span>Cliente</span></h1>
+
+      <div class="form-body">
+        <div class="field">
+          <label for="name">Nome Completo</label>
+          <input id="name" type="text" value="Pedro Lucas Dos Santos Xavier" readonly>
+        </div>
+
+        <div class="field">
+          <label for="document">CPF ou CNPJ</label>
+          <input id="document" type="text" value="918.883.405-80" readonly>
+        </div>
+
+        <div class="field date-field">
+          <label for="birthDate">Data de Nascimento</label>
+          <span class="calendar-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </span>
+          <input id="birthDate" type="text" value="27/06/2005" readonly>
+        </div>
+
+        <div class="field">
+          <label for="phone">Telefone</label>
+          <input id="phone" type="text" value="77 98848-8072" readonly>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="text" value="Pedrin007@gmail.com" readonly>
+        </div>
+
+        <div class="cep-row">
+          <div class="field">
+            <label for="postalCode">CEP</label>
+            <input id="postalCode" type="text" value="45000-000" readonly>
+          </div>
+          <div class="field">
+            <label for="street">Logradouro</label>
+            <input id="street" type="text" value="Avenida Brasil" readonly>
+          </div>
+        </div>
+
+        <div class="address-row">
+          <div class="field">
+            <label for="number">Nº</label>
+            <input id="number" type="text" value="2288" readonly>
+          </div>
+          <div class="field">
+            <label for="neighborhood">Bairro</label>
+            <input id="neighborhood" type="text" value="Recreio" readonly>
+          </div>
+        </div>
+
+        <div class="city-row">
+          <div class="field">
+            <label for="city">Cidade</label>
+            <input id="city" type="text" value="Vitória da Conquista" readonly>
+          </div>
+          <div class="field">
+            <label for="state">UF</label>
+            <input id="state" type="text" value="BA" readonly>
+          </div>
+        </div>
+
+        <div class="field civil-field">
+          <label for="maritalStatus">Estado civil</label>
+          <input id="maritalStatus" class="readonly-select" type="text" value="Solteiro" readonly>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Comprovante de residência</span>
+          <div class="upload is-static">
+            <span>comp_residencia.pdf</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="save-area">
+        <p id="status-exclusao" role="status" aria-live="polite"></p>
+        <button id="btn-excluir" class="delete-button" type="button">Excluir Cliente</button>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="modal-exclusao" aria-labelledby="modal-title" aria-describedby="modal-text">
+    <span class="modal-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </span>
+    <h2 id="modal-title">Tem certeza que deseja excluir este cliente?</h2>
+    <p id="modal-text">Esta ação não poderá ser desfeita.</p>
+    <div class="modal-actions">
+      <button id="btn-nao" class="btn-nao" type="button">Não</button>
+      <button id="btn-confirmar" class="btn-confirmar" type="button">Sim, excluir</button>
+    </div>
+  </dialog>
+
+  <dialog id="navigation-dialog" aria-labelledby="dialog-title"><h2 id="dialog-title">Módulo em desenvolvimento</h2><p id="navigation-message"></p><form method="dialog"><button class="delete-button">Voltar</button></form></dialog>
+</body>
+</html>
