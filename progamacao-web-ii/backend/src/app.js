@@ -1,10 +1,12 @@
 import express from "express";
 import prisma from "./database.js";
 import clienteRoutes from "./cliente/clienteRoutes.js";
+import cors from "cors";
 
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(clienteRoutes);
 

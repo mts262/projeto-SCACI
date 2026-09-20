@@ -94,23 +94,63 @@ form.addEventListener('submit', async event => {
   button.disabled = true;
 
   try {
-    if (!database) throw new Error('Storage unavailable');
-    const formData = new FormData(form);
-    const clientData = Object.fromEntries(formData.entries());
+    const dadosCliente = {
+      nome: form.elements.name.value,
+      cpf_cnpj: digits(form.elements.document.value),
+      data_nascimento: form.elements.birthDate.value,
+      telefone: form.elements.phone.value,
+      email: form.elements.email.value.trim() || null,
 
-    await new Promise((resolve, reject) => {
-      const transaction = database.transaction('clients', 'readwrite');
-      transaction.objectStore('clients').add({ client: clientData, fileName: selectedFile?.name });
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error);
+      // URL temporária até definir com a equipe o serviço de armazenamento dos arquivos
+      url_comprovante_residencia: "http://doc/res211.pdf", 
+      
+      logradouro: form.elements.street.value,
+      numero: form.elements.number.value,
+      bairro: form.elements.neighborhood.value,
+      complemento: form.elements.complement.value.trim() || null,
+      cidade: form.elements.city.value,
+      uf: form.elements.state.value,
+      cep: digits(form.elements.postalCode.value),
+      estado_civil: form.elements.maritalStatus.value
+      
+    };
+
+    if (dadosCliente.estado_civil === "casado") {
+      // Dados do cônjuge — preencher quando os campos forem adicionados ao formulário
+      /*
+      dadosCliente.conjuge_cpf = ...;
+      dadosCliente.conjuge_nome = ...;
+      dadosCliente.regime_bens = ...;
+      dadosCliente.conjuge_data_nascimento =  ...;
+      dadosCliente.url_comprovante_uniao = ...;
+      dadosCliente.data_casamento = ...;
+      dadosCliente.casamento_ativo = ...;
+      dadosCliente.data_fim_casamento = null
+      */
+    }
+
+    const resposta = await fetch('http://localhost:3000/cliente', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(dadosCliente)
     });
+
+    const resultado = await resposta.json();
+    console.log('Resposta do backend:', resultado);
+
+    if (!resposta.ok) {
+      throw new Error(resultado.erro || 'Erro ao cadastrar cliente.');
+    }
 
     dirty = false;
     status.textContent = 'Cadastro salvo com sucesso!';
     form.reset();
     fileName.textContent = 'Comprovante de Residência, clique para fazer upload ou arraste o arquivo aqui (PDF, PNG, JPG)';
-  } catch {
-    status.textContent = 'Erro ao salvar. Tente novamente.';
+  } catch (error) {
+    console.log(error);
+    status.textContent = error.message;
   } finally {
     button.disabled = false;
   }
