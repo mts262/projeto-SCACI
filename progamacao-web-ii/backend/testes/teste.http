@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ### Teste 2: Excluir cliente - Sucesso
-DELETE http://localhost:3000/cliente/21
+DELETE http://localhost:3000/cliente/22
 
 ### Teste 3: Excluir cliente - ID inexistente
 DELETE http://localhost:3000/cliente/999999
@@ -29,7 +29,7 @@ DELETE http://localhost:3000/cliente/999999
 DELETE http://localhost:3000/cliente/abc
 
 ### Teste 5: Atualizar cliente - Sucesso
-PUT http://localhost:3000/cliente/21
+PUT http://localhost:3000/cliente/22
 Content-Type: application/json
 
 {
@@ -46,7 +46,7 @@ Content-Type: application/json
 }
 
 ### Teste 7: Atualizar cliente - Campo vazio
-PUT http://localhost:3000/cliente/21
+PUT http://localhost:3000/cliente/22
 Content-Type: application/json
 
 {
