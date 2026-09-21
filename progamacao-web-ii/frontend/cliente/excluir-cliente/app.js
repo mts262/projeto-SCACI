@@ -1,6 +1,7 @@
 const modal = document.querySelector('#modal-exclusao');
 const status = document.querySelector('#status-exclusao');
 const confirmButton = document.querySelector('#btn-confirmar');
+const id_cliente = 24; // temporário até implementação das telas de listagem e pesquisar cliente
 
 // Abre o modal de confirmação
 document.querySelector('#btn-excluir').addEventListener('click', () => {
@@ -16,17 +17,31 @@ modal.addEventListener('click', event => {
   if (event.target === modal) modal.close();
 });
 
-// Exclusão simulada — apenas front por enquanto
+// Exclusão do clinete
 confirmButton.addEventListener('click', async () => {
   confirmButton.disabled = true;
 
   try {
-    // TODO backend: await fetch(`/api/clientes/${id}`, { method: 'DELETE' });
+    // substituir o id_cliente fixo no teste pelo ID do cliente 
+    // que o usuário realmente selecionar na tela de pesquisa/listagem.
+    const resposta = await fetch(`http://localhost:3000/cliente/${id_cliente}`, {
+      method: 'DELETE'
+    });
+
+    const resultado = await resposta.json();
+    console.log('Resposta do Backend:', resultado);
+
+    if (!resposta.ok) {
+      throw new Error(resultado.erro || 'Erro ao excluir cliente!');
+    }
+    
     modal.close();
-    status.textContent = 'Cliente excluído com sucesso.';
-  } catch {
+    status.textContent = resultado.mensagem;
+  } catch (error) {
+    console.log(error);
+
     modal.close();
-    status.textContent = 'Erro ao excluir. Tente novamente.';
+    status.textContent = error.message;
   } finally {
     confirmButton.disabled = false;
   }
