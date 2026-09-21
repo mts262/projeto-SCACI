@@ -380,5 +380,50 @@ async function excluirCliente(req, res) {
         return res.status(400).json({ erro: 'Erro ao excluir o cliente!' });
     }
 }
+/**
+ * @author Pedro Lucas Dos Santos Xavier
+ * 
+ * Pesquisa e lista clientes cadastrados no sistema:
+ * - Se nenhum parâmetro for informado na Query String: Retorna a lista completa de todos os clientes.
+ * - Se informados nome e/ou CPF/CNPJ: Aplica filtros dinâmicos de busca por texto parcial.
+ * - Retorna os dados ordenados do mais recente para o mais antigo, incluindo o histórico/dados do cônjuge.
+ * 
+ * @param {Object} req - Objeto de requisição do Express (espera parâmetros opcionais em `req.query`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna a lista de clientes encontrados em formato JSON com status HTTP 200.
+ */
+async function pesquisarCliente(req, res) {
+  try {
+    const { nome, cpf_cnpj } = req.query;
+    const where = {};
 
-export { cadastrarCliente, buscarClientePorId, editarCliente, excluirCliente };
+    if (nome && nome.trim() !== "") {
+      where.nome = {
+        contains: nome.trim(), 
+      };
+    }
+    if (cpf_cnpj && cpf_cnpj.trim() !== "") {
+      where.cpf_cnpj = {
+        contains: cpf_cnpj.trim(),
+      };
+    }
+    const clientes = await prisma.cliente.findMany({
+      where,
+      include: {
+        conjuge: true, 
+      },
+      orderBy: {
+        id_cliente: "desc",
+      },
+    });
+    return res.status(200).json(clientes);
+  } catch (erro) {
+    console.error("Erro ao pesquisar clientes:", erro);
+    return res.status(500).json({
+      erro: "Erro interno ao buscar clientes",
+      detalhes: erro.message,
+    });
+  }
+}
+
+export { cadastrarCliente, buscarClientePorId, editarCliente, excluirCliente, pesquisarCliente };
