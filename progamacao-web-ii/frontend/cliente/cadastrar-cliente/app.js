@@ -74,24 +74,34 @@ const dropZone = document.querySelector('#drop-zone');
 ['dragleave', 'drop'].forEach(type => dropZone.addEventListener(type, e => e.preventDefault()));
 dropZone.addEventListener('drop', e => chooseFile(e.dataTransfer.files[0]));
 
-// Submissão do Formulário
 form.addEventListener('submit', async event => {
   event.preventDefault();
  
   const checks = [
-    ['name', form.elements.name.value.trim().length >= 3, 'Informe o nome completo.'],
+    ['name', form.elements.name.value.trim().length >= 3, 'Informe o nome completo.', '#name-error'],
     ['document', [11, 14].includes(digits(form.elements.document.value).length), 'CPF ou CNPJ inválido.', '#document-error'],
     ['postalCode', digits(form.elements.postalCode.value).length === 8, 'CEP inválido.', '#postal-error'],
   ];
 
+  let temErro = false;
+
   for (const [key, valid, message, errorSelector] of checks) {
-    if (errorSelector) document.querySelector(errorSelector).textContent = valid ? '' : message;
+    const el = document.querySelector(errorSelector);
+    if (el) {
+      el.textContent = valid ? '' : message;
+    }
+    if (!valid) temErro = true;
   }
 
-  if (!form.checkValidity()) return;
+  // Se alguma validação personalizada falhou ou o formulário nativo é inválido, interrompe
+  if (temErro || !form.checkValidity()) {
+    form.reportValidity(); // Mostra o balão do erro nativo se houver algum campo obrigatório não preenchido
+    return;
+  }
 
   const button = form.querySelector('[type=submit]');
   button.disabled = true;
+  status.textContent = 'Salvando cadastro...';
 
   try {
     const dadosCliente = {
@@ -149,18 +159,18 @@ form.addEventListener('submit', async event => {
     });
 
     const resultado = await resposta.json();
-    console.log('Resposta do backend:', resultado);
 
     if (!resposta.ok) {
-      throw new Error(resultado.erro || 'Erro ao cadastrar cliente.');
+      throw new Error(resultado.erro || resultado.detalhes || 'Erro ao cadastrar cliente.');
     }
 
     dirty = false;
+    selectedFile = null;
     status.textContent = 'Cadastro salvo com sucesso!';
     form.reset();
     fileName.textContent = 'Comprovante de Residência, clique para fazer upload ou arraste o arquivo aqui (PDF, PNG, JPG)';
   } catch (error) {
-    console.log(error);
+    console.error('Erro na requisição:', error);
     status.textContent = error.message;
   } finally {
     button.disabled = false;

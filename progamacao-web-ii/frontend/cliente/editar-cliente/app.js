@@ -20,7 +20,8 @@ const initialClient = {
 let selectedFile = null;
 let selectedUnionProof = null;
 let dirty = false;
-let database;
+
+// Preenche opções do Select de Estado (UF)
 const states = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ');
 for (const state of states) form.elements.state.add(new Option(state, state));
 const today = new Date();
@@ -84,20 +85,21 @@ async function restore() {
   // Disable editing while restoring so that saved data cannot overwrite user input.
   const controls = [...form.elements];
   controls.forEach(control => control.disabled = true);
+  status.textContent = 'Carregando dados do cliente...';
+
   try {
-    database = await openDatabase();
-    const saved = await new Promise((resolve, reject) => {
-      const request = database.transaction('clients').objectStore('clients').get('demo-client');
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    if (saved) {
-      populate(saved.client);
-      selectedFile = saved.file;
-      if (selectedFile) fileName.textContent = selectedFile.name;
+    const response = await fetch(`${API_BASE_URL}/cliente/${clientId}`);
+    
+    if (!response.ok) {
+      throw new Error('Cliente não encontrado no banco de dados.');
     }
-  } catch {
-    status.textContent = 'O armazenamento local está indisponível. Não será possível salvar neste navegador.';
+
+    const cliente = await response.json();
+    preencherFormulario(cliente);
+    status.textContent = '';
+  } catch (err) {
+    console.error(err);
+    status.textContent = 'Erro ao carregar dados do cliente do servidor.';
   } finally {
     controls.forEach(control => control.disabled = false);
   }
@@ -216,19 +218,61 @@ form.addEventListener('submit', async event => {
   const client = Object.fromEntries(Object.keys(initialClient).map(key => [key, form.elements[key].value.trim()]));
   const button = form.querySelector('[type=submit]');
   button.disabled = true;
+  status.textContent = clientId ? 'Salvando alterações...' : 'Cadastrando cliente...';
+
+  // Mapeamento inverso do Estado Civil para os enums minúsculos do Prisma
+  const estadoCivilMapReverse = {
+    'Solteiro': 'solteiro',
+    'Casado': 'casado',
+    'Divorciado': 'divorciado',
+    'Viúvo': 'viuvo'
+  };
+
+  // Cria um objeto FormData compatível com o middleware multer
+  const formData = new FormData();
+  formData.append('nome', form.elements.name.value.trim());
+  formData.append('cpf_cnpj', digits(form.elements.document.value));
+  formData.append('data_nascimento', `${form.elements.birthDate.value}T00:00:00.000Z`);
+  formData.append('telefone', form.elements.phone.value.trim());
+  formData.append('logradouro', form.elements.street.value.trim());
+  formData.append('numero', form.elements.number.value.trim());
+  formData.append('bairro', form.elements.neighborhood.value.trim());
+  formData.append('cidade', form.elements.city.value.trim());
+  formData.append('uf', form.elements.state.value);
+  formData.append('cep', digits(form.elements.postalCode.value));
+  formData.append('estado_civil', estadoCivilMapReverse[form.elements.maritalStatus.value] || 'solteiro');
+
+  const emailValue = form.elements.email ? form.elements.email.value.trim() : '';
+  if (emailValue !== "") {
+    formData.append('email', emailValue);
+  }
+
+  // Anexa o novo arquivo de comprovante caso o usuário tenha selecionado um
+  if (selectedFile) {
+    formData.append('url_comprovante_residencia', selectedFile);
+  }
+
   try {
-    if (!database) throw new Error('Storage unavailable');
-    await new Promise((resolve, reject) => {
-      const transaction = database.transaction('clients', 'readwrite');
-      transaction.objectStore('clients').put({ client, file: selectedFile }, 'demo-client');
-      transaction.oncomplete = resolve;
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(transaction.error);
+    // Se houver clientId faz PUT, se não houver faz POST (Cadastro)
+    const url = clientId ? `${API_BASE_URL}/cliente/${clientId}` : `${API_BASE_URL}/cliente`;
+    const method = clientId ? 'PUT' : 'POST';
+
+    const response = await fetch(url, {
+      method: method,
+      body: formData // Não define Content-Type manual, o browser gerencia o boundary multipart
     });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      throw new Error(responseData.mensagem || responseData.erro || 'Erro na operação no banco de dados.');
+    }
+
     dirty = false;
-    status.textContent = 'Edição salva neste navegador.';
-  } catch {
-    status.textContent = 'Não foi possível salvar. Verifique o espaço e as permissões de armazenamento do navegador e tente novamente.';
+    status.textContent = clientId ? 'Cliente atualizado com sucesso!' : 'Cliente cadastrado com sucesso!';
+  } catch (err) {
+    console.error(err);
+    status.textContent = `Erro ao salvar: ${err.message}`;
   } finally {
     button.disabled = false;
   }

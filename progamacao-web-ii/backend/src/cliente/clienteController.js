@@ -150,6 +150,7 @@ async function cadastrarCliente(req, res) {
     }
 
     try {
+        // Valida CPF/CNPJ duplicado
         const clienteCpfExistente = await prisma.cliente.findUnique({
             where: { cpf_cnpj: dados.cpf_cnpj }
         });
@@ -182,14 +183,15 @@ async function cadastrarCliente(req, res) {
                 data: {
                     nome: dados.nome,
                     cpf_cnpj: dados.cpf_cnpj,
-                    data_nascimento: new Date(dados.data_nascimento),
+                    // Garante a correta conversão de data ISO evitando problemas de fuso horário
+                    data_nascimento: new Date(`${dados.data_nascimento}T00:00:00.000Z`),
                     telefone: dados.telefone,
                     email: email,
                     url_comprovante_residencia: urlComprovante,
                     logradouro: dados.logradouro,
                     numero: dados.numero,
                     bairro: dados.bairro,
-                    complemento: dados.complemento,
+                    complemento: complementoSanitizado,
                     cidade: dados.cidade,
                     uf: dados.uf,
                     cep: dados.cep,
@@ -218,7 +220,6 @@ async function cadastrarCliente(req, res) {
         return res.status(500).json({ erro: 'Erro ao inserir no banco', detalhes: error.message });
     }
 }
-
 /**
  * @author Pedro Lucas Dos Santos Xavier
  *

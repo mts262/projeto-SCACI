@@ -63,7 +63,7 @@ model conjuge {
   cliente               cliente                 @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "FK_Conjuge_1")
 
   @@id([id_cliente, cpf])
-}
+  }
 
 model corretor {
   id_corretor     Int              @id @default(autoincrement()) @db.UnsignedInt

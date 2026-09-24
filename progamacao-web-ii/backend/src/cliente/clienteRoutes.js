@@ -6,6 +6,7 @@ import {
   excluirCliente,
   pesquisarCliente // Descomente caso tenha criado a função de listagem/busca
 } from "./clienteController.js";
+import { upload } from "../middlewares/upload.js";
 
 
 const router = express.Router();
@@ -39,7 +40,7 @@ router.delete("/cliente/:id_cliente", excluirCliente);
 
 
 // Editar cliente por ID
-router.put("/cliente/:id_cliente", editarCliente);
+router.put("/cliente/:id_cliente",uploadCampos , editarCliente);
 
 
 // (Opcional) Listar / Buscar clientes
