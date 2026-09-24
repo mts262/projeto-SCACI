@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1c1c1b" />
+    <title>Clientes Cadastrados | S.C.A.C.I.</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="brand" aria-label="S.C.A.C.I.">
+      <span>S.C.A.</span><span>C.I.</span>
+    </header>
+
+    <aside class="sidebar" aria-label="Menu principal">
+      <p class="menu-title">Menu</p>
+      <nav>
+        <button type="button" data-secao="Início">Início</button>
+        <button type="button" data-secao="Clientes" aria-current="page">Clientes</button>
+        <button type="button" data-secao="Compradores">Compradores</button>
+        <button type="button" data-secao="Imóveis">Imóveis</button>
+        <button type="button" data-secao="Vendas">Vendas</button>
+        <button type="button" data-secao="Agenda de Visita">Agenda de Visita</button>
+        <button type="button" data-secao="Funcionários">Funcionários</button>
+        <button type="button" data-secao="Corretores">Corretores</button>
+      </nav>
+    </aside>
+
+    <main id="conteudo" tabindex="-1">
+      <nav class="breadcrumb" aria-label="Localização">
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-9.5Z"/>
+        </svg>
+        <span class="chevron" aria-hidden="true">‹</span>
+        <ol>
+          <li>Início</li>
+          <li aria-current="page">Clientes</li>
+        </ol>
+      </nav>
+
+      <section class="content" aria-labelledby="titulo-pagina">
+        <h1 id="titulo-pagina">Clientes <span>Cadastrados</span></h1>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Nome</th>
+                <th scope="col">CPF/CNPJ</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">Email</th>
+                <th scope="col"><span class="sr-only">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody id="corpo-tabela"></tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <p id="resumo-tabela" aria-live="polite">Carregando clientes...</p>
+          <div class="pagination" id="paginacao" aria-label="Paginação"></div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="dialogo-aviso" aria-labelledby="titulo-aviso">
+      <h2 id="titulo-aviso">Módulo em desenvolvimento</h2>
+      <p id="mensagem-aviso">Essa funcionalidade ainda não está disponível nesta versão.</p>
+      <form method="dialog">
+        <button class="primary-button" type="submit">Voltar</button>
+      </form>
+    </dialog>
+  </body>
+</html>
