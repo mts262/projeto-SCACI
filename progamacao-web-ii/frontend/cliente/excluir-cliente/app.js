@@ -1,7 +1,39 @@
 const modal = document.querySelector('#modal-exclusao');
 const status = document.querySelector('#status-exclusao');
 const confirmButton = document.querySelector('#btn-confirmar');
-const id_cliente = 24; // temporário até implementação das telas de listagem e pesquisar cliente
+const parametros = new URLSearchParams(window.location.search);
+const id_cliente = parametros.get("id");
+
+async function carregarCliente() {
+    try {
+        const resposta = await fetch(`http://localhost:3000/cliente/${id_cliente}`);
+
+        const cliente = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(cliente.erro || cliente.mensagem || "Erro ao carregar cliente.");
+        }
+
+        document.querySelector("#name").value = cliente.nome;
+        document.querySelector("#document").value = cliente.cpf_cnpj;
+        document.querySelector("#birthDate").value = cliente.data_nascimento;
+        document.querySelector("#phone").value = cliente.telefone;
+        document.querySelector("#email").value = cliente.email || "";
+        document.querySelector("#postalCode").value = cliente.cep;
+        document.querySelector("#street").value = cliente.logradouro;
+        document.querySelector("#number").value = cliente.numero;
+        document.querySelector("#neighborhood").value = cliente.bairro;
+        document.querySelector("#city").value = cliente.cidade;
+        document.querySelector("#state").value = cliente.uf;
+        document.querySelector("#maritalStatus").value = cliente.estado_civil;
+
+    } catch (error) {
+        console.error(error);
+        status.textContent = error.message;
+    }
+}
+
+carregarCliente();
 
 // Abre o modal de confirmação
 document.querySelector('#btn-excluir').addEventListener('click', () => {
@@ -29,14 +61,18 @@ confirmButton.addEventListener('click', async () => {
     });
 
     const resultado = await resposta.json();
-    console.log('Resposta do Backend:', resultado);
+    console.log('Resposta do Backend:', JSON.stringify(resultado, null, 2));
 
     if (!resposta.ok) {
       throw new Error(resultado.erro || 'Erro ao excluir cliente!');
     }
     
     modal.close();
-    status.textContent = resultado.mensagem;
+    status.textContent = "Cliente excluído com sucesso!";
+
+    setTimeout(() => {
+      window.location.href = "../listagem-clientes/index.html";
+    }, 1000);
   } catch (error) {
     console.log(error);
 

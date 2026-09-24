@@ -3,7 +3,8 @@ import {
   cadastrarCliente,
   editarCliente,
   excluirCliente,
-  pesquisarCliente // Descomente caso tenha criado a função de listagem/busca
+  pesquisarCliente,
+  buscarClientePorId 
 } from "./clienteController.js";
 import { upload } from "../middlewares/upload.js";
 
@@ -25,7 +26,10 @@ router.delete("/cliente/:id_cliente", excluirCliente);
 // Editar cliente por ID
 router.put("/cliente/:id_cliente", editarCliente);
 
-// (Opcional) Listar / Buscar clientes
+// Listar / Buscar clientes
 router.get("/clientes", pesquisarCliente);
+
+// Busca um cliente pelo seu id
+router.get("/cliente/:id_cliente", buscarClientePorId);
 
 export default router;

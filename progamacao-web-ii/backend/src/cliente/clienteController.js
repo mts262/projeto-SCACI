@@ -421,7 +421,12 @@ async function excluirCliente(req, res) {
         return res.status(200).json({ mensagem: 'Cliente excluído com sucesso!' });
 
     } catch (error) {
-        return res.status(400).json({ erro: 'Erro ao excluir o cliente!' });
+        console.error("Erro ao excluir cliente:", error);
+
+    return res.status(500).json({
+        erro: "Erro ao excluir o cliente!",
+        detalhes: error.message
+    });
     }
 }
 

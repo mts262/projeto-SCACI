@@ -7,7 +7,8 @@
 
 const PAGINA_TAMANHO = 11;
 
-const ROTA_EDITAR_CLIENTE = "../frontend/cliente/editar-cliente/index.html";
+const ROTA_EDITAR_CLIENTE = "../editar-cliente/index.html";
+const ROTA_EXCLUIR_CLIENTE = "../excluir-cliente/index.html";
 
 
 
@@ -321,12 +322,14 @@ corpoTabela.addEventListener("click", (evento) => {
     fecharMenuAcoes();
 
     if (acao === "editar") {
-        window.location.href = ROTA_EDITAR_CLIENTE;
+        const id_cliente = botao.dataset.idCliente;
+        window.location.href = `${ROTA_EDITAR_CLIENTE}?id=${id_cliente}`;
         return;
     }
 
     if (acao === "excluir") {
-        mostrarAviso("A exclusão de cliente será liberada em uma próxima etapa.");
+        const id_cliente = botao.dataset.idCliente;
+        window.location.href = `${ROTA_EXCLUIR_CLIENTE}?id=${id_cliente}`;
     }
 });
 
@@ -367,15 +370,23 @@ botoesMenu.forEach((botao) => {
     });
 });
 
-carregarClientes()
-    .then((lista) => {
-        clientes = lista;
-        renderizarTabela();
-        renderizarPaginacao();
-    })
-    .catch(() => {
-        clientes = [];
-        corpoTabela.innerHTML = '<tr><td colspan="5" class="empty-state">Não foi possível carregar os clientes.</td></tr>';
-        resumoTabela.textContent = "Exibindo 0 de 0 clientes";
-        paginacao.innerHTML = "";
-    });
+function atualizarLista() {
+    carregarClientes()
+        .then((lista) => {
+            clientes = lista;
+
+            // Garante que a página atual ainda existe
+            paginaAtual = Math.min(paginaAtual, totalPaginas());
+
+            renderizarTabela();
+            renderizarPaginacao();
+        })
+        .catch(() => {
+            clientes = [];
+            corpoTabela.innerHTML = '<tr><td colspan="5" class="empty-state">Não foi possível carregar os clientes.</td></tr>';
+            resumoTabela.textContent = "Exibindo 0 de 0 clientes";
+            paginacao.innerHTML = "";
+        });
+}
+
+window.addEventListener("pageshow", atualizarLista);
