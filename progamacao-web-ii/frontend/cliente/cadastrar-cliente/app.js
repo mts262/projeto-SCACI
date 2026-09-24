@@ -1,74 +1,105 @@
-const form = document.querySelector('#client-form');
-const status = document.querySelector('#save-status');
-const proof = document.querySelector('#proof');
-const fileName = document.querySelector('#file-name');
-const fileError = document.querySelector('#file-error');
+const DB_NAME = 'SCACIDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'clients';
 
-let selectedFile = null;
-let dirty = false;
-let database;
+let db = null;
 
-// Preenche opções de UF
-const states = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ');
-const stateSelect = form.elements.state;
-for (const state of states) stateSelect.add(new Option(state, state));
-
-function openDatabase() {
+// Inicialização do IndexedDB
+function initDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('scaci', 1);
-    request.onupgradeneeded = () => request.result.createObjectStore('clients', { autoIncrement: true });
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      resolve(db);
+    };
+
+    request.onerror = (e) => reject(e.target.error);
   });
 }
 
-openDatabase().then(db => database = db).catch(() => {
-  status.textContent = 'O armazenamento local está indisponível.';
+// Inicializar lista de UFs
+const ufs = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+const stateSelect = document.getElementById('state');
+ufs.forEach(uf => {
+  const opt = document.createElement('option');
+  opt.value = uf;
+  opt.textContent = uf;
+  stateSelect.appendChild(opt);
 });
 
-const digits = value => value.replace(/\D/g, '');
+// Manipulação Dinâmica da Seção do Cônjuge
+const maritalStatusSelect = document.getElementById('maritalStatus');
+const spouseSection = document.getElementById('spouse-section');
 
-// Máscara CPF/CNPJ
-form.elements.document.addEventListener('input', event => {
-  const value = digits(event.target.value).slice(0, 14);
-  event.target.value = value.length <= 11
-    ? value.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/(\.\d{3})(\d)/, '$1-$2')     : value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})$/, '$1.$2.$3/$4-$5');
-});
+const requiredSpouseFields = [
+  document.getElementById('spouseName'),
+  document.getElementById('spouseDocument'),
+  document.getElementById('weddingDate'),
+  document.getElementById('propertyRegime'),
+  document.getElementById('activeMarriage'),
+  document.getElementById('unionProof')
+];
 
-// Máscara CEP
-form.elements.postalCode.addEventListener('input', event => {
-  event.target.value = digits(event.target.value).slice(0, 8).replace(/^(\d{5})(\d)/, '$1-$2');
-});
+maritalStatusSelect.addEventListener('change', (e) => {
+  const isCasado = e.target.value === 'Casado';
 
-// Máscara Telefone
-form.elements.phone.addEventListener('input', event => {
-  const value = digits(event.target.value).slice(0, 11);
-  event.target.value = value.replace(/^(\d{2})(\d)/, '$1 $2').replace(/(\d{4,5})(\d{4})$/, '$1-$2');
-});
-
-form.addEventListener('input', () => {
-  dirty = true;
-  status.textContent = '';
-  document.querySelector('#document-error').textContent = '';
-  document.querySelector('#postal-error').textContent = '';
-});
-
-// Upload de Arquivo
-function chooseFile(file) {
-  if (!file) return;
-  const validType = ['application/pdf', 'image/png', 'image/jpeg'].includes(file.type);
-  if (!validType || file.size > 5 * 1024 * 1024) {
-    fileError.textContent = 'Selecione um PDF, PNG ou JPG de até 5 MB.';
-    return;
+  if (isCasado) {
+    spouseSection.classList.remove('hidden');
+    requiredSpouseFields.forEach(field => field.setAttribute('required', 'true'));
+  } else {
+    spouseSection.classList.add('hidden');
+    requiredSpouseFields.forEach(field => {
+      field.removeAttribute('required');
+      field.value = '';
+    });
+    document.getElementById('spouseBirthDate').value = '';
+    document.getElementById('spouse-file-name').textContent = 'Comprovante de União, clique para fazer upload ou arraste o arquivo aqui (PDF, PNG, JPG)';
   }
-  selectedFile = file;
-  fileName.textContent = file.name;
-  fileError.textContent = '';
-  dirty = true;
+});
+
+// Drag and Drop e Upload
+function setupUpload(dropZoneId, inputId, fileNameId) {
+  const dropZone = document.getElementById(dropZoneId);
+  const input = document.getElementById(inputId);
+  const fileName = document.getElementById(fileNameId);
+
+  input.addEventListener('change', () => {
+    if (input.files.length > 0) {
+      fileName.textContent = `Arquivo selecionado: ${input.files[0].name}`;
+    }
+  });
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--blue)';
+  });
+
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = '#3d3d3d';
+  });
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = '#3d3d3d';
+    if (e.dataTransfer.files.length > 0) {
+      input.files = e.dataTransfer.files;
+      fileName.textContent = `Arquivo selecionado: ${e.dataTransfer.files[0].name}`;
+    }
+  });
 }
 
-proof.addEventListener('change', () => chooseFile(proof.files[0]));
+setupUpload('drop-zone', 'proof', 'file-name');
+setupUpload('spouse-drop-zone', 'unionProof', 'spouse-file-name');
 
+<<<<<<< HEAD:progamacao-web-ii/frontend/cliente/cadastrar-cliente/app.js
 const dropZone = document.querySelector('#drop-zone');
 ['dragenter', 'dragover'].forEach(type => dropZone.addEventListener(type, e => e.preventDefault()));
 ['dragleave', 'drop'].forEach(type => dropZone.addEventListener(type, e => e.preventDefault()));
@@ -174,13 +205,65 @@ form.addEventListener('submit', async event => {
     status.textContent = error.message;
   } finally {
     button.disabled = false;
+=======
+// Busca CEP Automática (ViaCEP API)
+document.getElementById('postalCode').addEventListener('blur', async (e) => {
+  const cep = e.target.value.replace(/\D/g, '');
+  if (cep.length === 8) {
+    try {
+      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await res.json();
+      if (!data.erro) {
+        document.getElementById('street').value = data.logradouro;
+        document.getElementById('neighborhood').value = data.bairro;
+        document.getElementById('city').value = data.localidade;
+        document.getElementById('state').value = data.uf;
+      }
+    } catch (err) {
+      console.error('Erro ao buscar CEP:', err);
+    }
+>>>>>>> 02b2258 (Atualiza arquivos do formulario Cadastrar_Cliente com secao de conjugue):progamacao-web-ii/FrontEnd/Cadastrar_Cliente/app.js
   }
 });
 
-// Navegação do menu
-document.querySelectorAll('[data-section]').forEach(button => button.addEventListener('click', () => {
-  if (button.dataset.section !== 'Clientes') {
-    document.querySelector('#navigation-message').textContent = `A seção “${button.dataset.section}” ainda não está disponível.`;
-    document.querySelector('#navigation-dialog').showModal();
+// Envio do Formulário e Persistência
+const form = document.getElementById('client-form');
+const saveStatus = document.getElementById('save-status');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
   }
-}));
+
+  const formData = new FormData(form);
+  const clientData = Object.fromEntries(formData.entries());
+
+  try {
+    if (!db) await initDB();
+    
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.add(clientData);
+
+    tx.oncomplete = () => {
+      saveStatus.textContent = 'Cliente cadastrado com sucesso!';
+      form.reset();
+      spouseSection.classList.add('hidden');
+      document.getElementById('file-name').textContent = 'Comprovante de Residência, clique para fazer upload ou arraste o arquivo aqui (PDF, PNG, JPG)';
+      setTimeout(() => saveStatus.textContent = '', 4000);
+    };
+
+    tx.onerror = () => {
+      saveStatus.textContent = 'Erro ao salvar no banco de dados.';
+    };
+  } catch (err) {
+    console.error(err);
+    saveStatus.textContent = 'Erro inesperado ao salvar.';
+  }
+});
+
+// Inicialização da Base
+initDB();

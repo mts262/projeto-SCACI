@@ -56,6 +56,10 @@ h1 span {
   color: var(--blue);
 }
 
+.brand span:last-child { 
+  color: var(--gold); 
+}
+
 .sidebar {
   position: absolute;
   top: 80px;
@@ -154,7 +158,7 @@ form#client-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 680px;
+  max-width: 630px;
   width: 100%;
 }
 
@@ -233,7 +237,7 @@ select:valid {
 }
 
 .civil-field { 
-  width: 50%; 
+  width: 45%; 
 }
 
 /* Upload Area */
@@ -268,40 +272,14 @@ select:valid {
   cursor: pointer;
 }
 
-/* Seção do Cônjuge */
-.hidden {
-  display: none !important;
-}
-
-.spouse-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-}
-
-.section-divider {
-  border: 0;
-  height: 1px;
-  background: #2d2d2d;
-  margin: 16px 0 8px;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--blue);
-  margin: 0 0 8px;
-}
-
-/* Botão Salvar (Extrema Direita) */
+/* Save Area */
 .save-area {
   margin-top: auto;
   padding-top: 24px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  width: 100%;
+  align-items: flex-end; 
+  width: 100%; 
 }
 
 .save-button {
