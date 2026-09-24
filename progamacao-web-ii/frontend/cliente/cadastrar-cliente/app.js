@@ -74,82 +74,87 @@ const dropZone = document.querySelector('#drop-zone');
 ['dragleave', 'drop'].forEach(type => dropZone.addEventListener(type, e => e.preventDefault()));
 dropZone.addEventListener('drop', e => chooseFile(e.dataTransfer.files[0]));
 
-// Submissão do Formulário
 form.addEventListener('submit', async event => {
   event.preventDefault();
   
+  if (!selectedFile) {
+    fileError.textContent = 'Por favor, selecione um comprovante de residência.';
+    return;
+  }
+
+  // 1. Validações do formulário
   const checks = [
-    ['name', form.elements.name.value.trim().length >= 3, 'Informe o nome completo.'],
+    ['name', form.elements.name.value.trim().length >= 3, 'Informe o nome completo.', '#name-error'],
     ['document', [11, 14].includes(digits(form.elements.document.value).length), 'CPF ou CNPJ inválido.', '#document-error'],
     ['postalCode', digits(form.elements.postalCode.value).length === 8, 'CEP inválido.', '#postal-error'],
   ];
 
+  let temErro = false;
+
   for (const [key, valid, message, errorSelector] of checks) {
-    if (errorSelector) document.querySelector(errorSelector).textContent = valid ? '' : message;
+    const el = document.querySelector(errorSelector);
+    if (el) {
+      el.textContent = valid ? '' : message;
+    }
+    if (!valid) temErro = true;
   }
 
-  if (!form.checkValidity()) return;
+  // Se alguma validação personalizada falhou ou o formulário nativo é inválido, interrompe
+  if (temErro || !form.checkValidity()) {
+    form.reportValidity(); // Mostra o balão do erro nativo se houver algum campo obrigatório não preenchido
+    return;
+  }
 
   const button = form.querySelector('[type=submit]');
   button.disabled = true;
+  status.textContent = 'Salvando cadastro...';
 
   try {
-    const dadosCliente = {
-      nome: form.elements.name.value,
-      cpf_cnpj: digits(form.elements.document.value),
-      data_nascimento: form.elements.birthDate.value,
-      telefone: form.elements.phone.value,
-      email: form.elements.email.value.trim() || null,
+    const formData = new FormData();
 
-      // URL temporária até definir com a equipe o serviço de armazenamento dos arquivos
-      url_comprovante_residencia: "http://doc/res211.pdf", 
-      
-      logradouro: form.elements.street.value,
-      numero: form.elements.number.value,
-      bairro: form.elements.neighborhood.value,
-      complemento: form.elements.complement.value.trim() || null,
-      cidade: form.elements.city.value,
-      uf: form.elements.state.value,
-      cep: digits(form.elements.postalCode.value),
-      estado_civil: form.elements.maritalStatus.value
-      
-    };
-
-    if (dadosCliente.estado_civil === "casado") {
-      // Dados do cônjuge — preencher quando os campos forem adicionados ao formulário
-      /*
-      dadosCliente.conjuge_cpf = ...;
-      dadosCliente.conjuge_nome = ...;
-      dadosCliente.regime_bens = ...;
-      dadosCliente.conjuge_data_nascimento =  ...;
-      dadosCliente.url_comprovante_uniao = ...;
-      dadosCliente.data_casamento = ...;
-      dadosCliente.casamento_ativo = ...;
-      dadosCliente.data_fim_casamento = null
-      */
+    formData.append('nome', form.elements.name.value.trim());
+    formData.append('cpf_cnpj', digits(form.elements.document.value));
+    formData.append('data_nascimento', form.elements.birthDate.value);
+    formData.append('telefone', form.elements.phone.value);
+    
+    if (form.elements.email.value.trim()) {
+      formData.append('email', form.elements.email.value.trim());
     }
+
+    formData.append('logradouro', form.elements.street.value);
+    formData.append('numero', form.elements.number.value);
+    formData.append('bairro', form.elements.neighborhood.value);
+    
+    if (form.elements.complement.value.trim()) {
+      formData.append('complemento', form.elements.complement.value.trim());
+    }
+
+    formData.append('cidade', form.elements.city.value);
+    formData.append('uf', form.elements.state.value);
+    formData.append('cep', digits(form.elements.postalCode.value));
+    formData.append('estado_civil', form.elements.maritalStatus.value);
+
+    // Chave exata configurada no Multer upload.fields no backend
+    formData.append('url_comprovante_residencia', selectedFile);
 
     const resposta = await fetch('http://localhost:3000/cliente', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(dadosCliente)
+      body: formData
     });
 
     const resultado = await resposta.json();
-    console.log('Resposta do backend:', resultado);
 
     if (!resposta.ok) {
-      throw new Error(resultado.erro || 'Erro ao cadastrar cliente.');
+      throw new Error(resultado.erro || resultado.detalhes || 'Erro ao cadastrar cliente.');
     }
 
     dirty = false;
+    selectedFile = null;
     status.textContent = 'Cadastro salvo com sucesso!';
     form.reset();
     fileName.textContent = 'Comprovante de Residência, clique para fazer upload ou arraste o arquivo aqui (PDF, PNG, JPG)';
   } catch (error) {
-    console.log(error);
+    console.error('Erro na requisição:', error);
     status.textContent = error.message;
   } finally {
     button.disabled = false;
