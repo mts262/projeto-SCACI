@@ -4,8 +4,12 @@ import path from 'path';
 // Configura como e onde salvar os arquivos no disco local
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        // Aponta para a pasta 'uploads' dentro da raiz do backend
-        cb(null, 'uploads/');
+        // Aponta para a pasta 'uploads' dentro da raiz do backend e suas subpastas
+        if (file.fieldname === "comprovante_residencia") {
+            cb(null, "uploads/comprovantes-residencia/");
+        } else if (file.fieldname === "comprovante_uniao") {
+            cb(null, "uploads/comprovantes-uniao/");
+        }
     },
     filename: (req, file, cb) => {
         // Gera um nome único (timestamp + número aleatório + extensão)

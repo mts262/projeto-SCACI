@@ -191,7 +191,7 @@ async function cadastrarCliente(req, res) {
                     logradouro: dados.logradouro,
                     numero: dados.numero,
                     bairro: dados.bairro,
-                    complemento: complementoSanitizado,
+                    complemento: dados.complemento,
                     cidade: dados.cidade,
                     uf: dados.uf,
                     cep: dados.cep,
@@ -220,6 +220,7 @@ async function cadastrarCliente(req, res) {
         return res.status(500).json({ erro: 'Erro ao inserir no banco', detalhes: error.message });
     }
 }
+
 /**
  * @author Pedro Lucas Dos Santos Xavier
  *
@@ -233,11 +234,9 @@ async function cadastrarCliente(req, res) {
 async function buscarClientePorId(req, res) {
     const id = Number(req.params.id || req.params.id_cliente);
 
-
     if (isNaN(id)) {
         return res.status(400).json({ mensagem: "O ID fornecido deve ser um número válido." });
     }
-
 
     try {
         const cliente = await prisma.cliente.findUnique({
@@ -249,18 +248,15 @@ async function buscarClientePorId(req, res) {
             }
         });
 
-
         if (!cliente) {
             return res.status(404).json({ mensagem: "Cliente não encontrado." });
         }
-
 
         return res.status(200).json(cliente);
     } catch (error) {
         return res.status(500).json({ erro: "Erro ao buscar cliente.", detalhes: error.message });
     }
 }
-
 
 /**
  * @author Pedro Lucas Dos Santos Xavier
@@ -278,34 +274,27 @@ async function buscarClientePorId(req, res) {
 async function editarCliente(req, res) {
     const id = Number(req.params.id || req.params.id_cliente);
 
-
     if (isNaN(id)) {
         return res.status(400).json({ mensagem: "O ID fornecido deve ser um número válido." });
     }
 
-
     const dadosAtuais = req.body;
-
 
     const erro = verificarDadosEdicaoCliente(dadosAtuais);
     if (erro) {
         return res.status(400).json({ mensagem: erro });
     }
 
-
     // Separa os dados do cônjuge das propriedades do cliente
     const { conjuge, ...dadosCliente } = dadosAtuais;
-
 
     // Tratamento de conversão de datas para os campos do cliente
     if (dadosCliente.data_nascimento) {
         dadosCliente.data_nascimento = new Date(dadosCliente.data_nascimento);
     }
 
-
     try {
         const clienteAtualizado = await prisma.$transaction(async (tx) => {
-
 
             // 1. Atualiza dados cadastrais do cliente
             if (Object.keys(dadosCliente).length > 0) {
@@ -315,19 +304,16 @@ async function editarCliente(req, res) {
                 });
             }
 
-
             // 2. REGRA DE NEGÓCIO: Divórcio
             if (dadosCliente.estado_civil === "divorciado") {
                 const conjugeAtivo = await tx.conjuge.findFirst({
                     where: { id_cliente: id, casamento_ativo: "sim" }
                 });
 
-
                 if (conjugeAtivo) {
                     const dataFim = (conjuge && conjuge.data_fim_casamento)
                         ? new Date(conjuge.data_fim_casamento)
                         : new Date();
-
 
                     await tx.conjuge.update({
                         where: {
@@ -341,16 +327,13 @@ async function editarCliente(req, res) {
                 }
             }
 
-
             // 3. REGRA DE NEGÓCIO: Edição ou Novo Cadastro de Cônjuge
             if (conjuge && (conjuge.cpf || conjuge.conjuge_cpf)) {
                 const cpfConjuge = conjuge.cpf || conjuge.conjuge_cpf;
 
-
                 const conjugeExistente = await tx.conjuge.findFirst({
                     where: { id_cliente: id, cpf: cpfConjuge }
                 });
-
 
                 if (conjugeExistente) {
                     // Edição do cônjuge existente
@@ -376,7 +359,6 @@ async function editarCliente(req, res) {
                         }
                     });
 
-
                     await tx.conjuge.create({
                         data: {
                             id_cliente: id,
@@ -392,7 +374,6 @@ async function editarCliente(req, res) {
                 }
             }
 
-
             // 4. Retorna o cliente atualizado trazendo a lista de cônjuges ordenada
             return await tx.cliente.findUnique({
                 where: { id_cliente: id },
@@ -404,9 +385,7 @@ async function editarCliente(req, res) {
             });
         });
 
-
         return res.status(200).json(clienteAtualizado);
-
 
     } catch (error) {
         if (error.code === 'P2025') {
@@ -415,7 +394,6 @@ async function editarCliente(req, res) {
         return res.status(500).json({ erro: 'Erro ao atualizar no banco', detalhes: error.message });
     }
 }
-
 
 /**
  * @author Matheus Pereira Rodrigues
@@ -429,11 +407,9 @@ async function editarCliente(req, res) {
 async function excluirCliente(req, res) {
     const id = Number(req.params.id_cliente || req.params.id);
 
-
     if (isNaN(id)) {
         return res.status(400).json({ erro: "O ID fornecido deve ser um número válido." });
     }
-
 
     try {
         await prisma.cliente.delete({
@@ -442,14 +418,13 @@ async function excluirCliente(req, res) {
             }
         });
 
-
         return res.status(200).json({ mensagem: 'Cliente excluído com sucesso!' });
-
 
     } catch (error) {
         return res.status(400).json({ erro: 'Erro ao excluir o cliente!' });
     }
 }
+
 /**
  * @author Pedro Lucas Dos Santos Xavier
  *
