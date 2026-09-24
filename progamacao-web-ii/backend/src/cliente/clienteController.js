@@ -107,8 +107,19 @@ async function cadastrarConjuge(dados, id_cliente, tx = prisma) {
  * @returns {Promise<Object>} Retorna o status HTTP e os dados do cliente criado com o histórico de cônjuges.
  */
 async function cadastrarCliente(req, res) {
-    const dados = req.body;
-
+  const dados = { ...req.body };
+    if (req.files) {
+        if (req.files.url_comprovante_residencia && req.files.url_comprovante_residencia[0]) {
+            const arqResidencia = req.files.url_comprovante_residencia[0];
+            dados.url_comprovante_residencia = `${req.protocol}://${req.get('host')}/uploads/${arqResidencia.filename}`;
+        }
+        if (req.files.url_comprovante_uniao && req.files.url_comprovante_uniao[0]) {
+            const arqUniao = req.files.url_comprovante_uniao[0];
+            dados.url_comprovante_uniao = `${req.protocol}://${req.get('host')}/uploads/${arqUniao.filename}`;
+        }
+    }
+    const emailSanitizado = (dados.email && dados.email.trim() !== "") ? dados.email.trim() : null;
+    const complementoSanitizado = (dados.complemento && dados.complemento.trim() !== "") ? dados.complemento.trim() : null;
     let casado = (dados.estado_civil === "casado");
 
     let faltando = verificarDadosCliente(dados, casado);
@@ -118,6 +129,7 @@ async function cadastrarCliente(req, res) {
     }
 
     try {
+        // Valida CPF/CNPJ duplicado
         const clienteCpfExistente = await prisma.cliente.findUnique({
             where: { cpf_cnpj: dados.cpf_cnpj }
         });
@@ -126,13 +138,14 @@ async function cadastrarCliente(req, res) {
             return res.status(400).json({ erro: 'Existe um cliente cadastrado com esses dados!' });
         }
 
-        if (dados.email != null) {
+        // Valida E-mail duplicado caso tenha sido preenchido
+        if (emailSanitizado !== null) {
             const clienteEmailExistente = await prisma.cliente.findUnique({
-                where: { email: dados.email }
+                where: { email: emailSanitizado }
             });
 
             if (clienteEmailExistente) {
-                return res.status(400).json({ erro: 'Existe um cliente cadastrado com esses dados!' });
+                return res.status(400).json({ erro: 'Existe um cliente cadastrado com esse e-mail!' });
             }
         }
 
@@ -141,14 +154,15 @@ async function cadastrarCliente(req, res) {
                 data: {
                     nome: dados.nome,
                     cpf_cnpj: dados.cpf_cnpj,
-                    data_nascimento: new Date(dados.data_nascimento),
+                    // Garante a correta conversão de data ISO evitando problemas de fuso horário
+                    data_nascimento: new Date(`${dados.data_nascimento}T00:00:00.000Z`),
                     telefone: dados.telefone,
-                    email: dados.email,
+                    email: emailSanitizado,
                     url_comprovante_residencia: dados.url_comprovante_residencia,
                     logradouro: dados.logradouro,
                     numero: dados.numero,
                     bairro: dados.bairro,
-                    complemento: dados.complemento,
+                    complemento: complementoSanitizado,
                     cidade: dados.cidade,
                     uf: dados.uf,
                     cep: dados.cep,
@@ -173,10 +187,11 @@ async function cadastrarCliente(req, res) {
         return res.status(200).json({ cliente: resultado });
 
     } catch (error) {
+        // Imprime o erro detalhado no terminal para verificação de exceções do Prisma
+        console.error("Erro no cadastro de cliente:", error);
         return res.status(500).json({ erro: 'Erro ao inserir no banco', detalhes: error.message });
     }
 }
-
 /**
  * @author Pedro Lucas Dos Santos Xavier
  * 
