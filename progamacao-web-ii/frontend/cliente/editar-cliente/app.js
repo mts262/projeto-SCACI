@@ -8,6 +8,9 @@ const unionFileName = document.querySelector('#union-file-name');
 const unionFileError = document.querySelector('#union-file-error');
 const spouseField = document.querySelector('#spouse-field');
 const marriageEndDateField = document.querySelector('#marriage-end-date-field');
+const API_BASE_URL = 'http://localhost:3000';
+const urlParams = new URLSearchParams(window.location.search);
+const clientId = urlParams.get('id'); // Lê o ?id=X enviado pela listagem
 const initialClient = {
   name: 'Pedro Lucas Dos Santos Xavier', document: '918.883.405-80',
   birthDate: '2005-06-27', phone: '77 98848-8072', email: 'Pedrin007@gmail.com',
@@ -80,6 +83,60 @@ function openDatabase() {
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
+}
+function preencherFormulario(cliente) {
+  if (!cliente) return;
+
+  const estadoCivilMap = {
+    'solteiro': 'Solteiro',
+    'casado': 'Casado',
+    'divorciado': 'Divorciado',
+    'viuvo': 'Viúvo'
+  };
+
+  // Preenchimento dos dados do cliente
+  if (form.elements.name) form.elements.name.value = cliente.nome || '';
+  if (form.elements.document) form.elements.document.value = cliente.cpf_cnpj || '';
+  
+  if (form.elements.birthDate && cliente.data_nascimento) {
+    form.elements.birthDate.value = cliente.data_nascimento.split('T')[0];
+  }
+
+  if (form.elements.phone) form.elements.phone.value = cliente.telefone || '';
+  if (form.elements.email) form.elements.email.value = cliente.email || '';
+  if (form.elements.street) form.elements.street.value = cliente.logradouro || '';
+  if (form.elements.number) form.elements.number.value = cliente.numero || '';
+  if (form.elements.neighborhood) form.elements.neighborhood.value = cliente.bairro || '';
+  if (form.elements.city) form.elements.city.value = cliente.cidade || '';
+  if (form.elements.state) form.elements.state.value = cliente.uf || '';
+  if (form.elements.postalCode) form.elements.postalCode.value = cliente.cep || '';
+
+  if (form.elements.maritalStatus) {
+    form.elements.maritalStatus.value = estadoCivilMap[cliente.estado_civil] || cliente.estado_civil || 'Solteiro';
+  }
+
+  // Preenchimento dos dados do cônjuge (obtém o mais recente do array conjuge)
+  const conjugeAtivo = Array.isArray(cliente.conjuge) && cliente.conjuge.length > 0 ? cliente.conjuge[0] : null;
+
+  if (conjugeAtivo) {
+    if (form.elements.spouseName) form.elements.spouseName.value = conjugeAtivo.nome || '';
+    if (form.elements.spouseDocument) form.elements.spouseDocument.value = conjugeAtivo.cpf || '';
+    if (form.elements.spouseBirthDate && conjugeAtivo.data_nascimento) {
+      form.elements.spouseBirthDate.value = conjugeAtivo.data_nascimento.split('T')[0];
+    }
+    if (form.elements.spousePropertyRegime) form.elements.spousePropertyRegime.value = conjugeAtivo.regime_bens || '';
+    if (form.elements.marriageDate && conjugeAtivo.data_casamento) {
+      form.elements.marriageDate.value = conjugeAtivo.data_casamento.split('T')[0];
+    }
+    if (form.elements.marriageActive) {
+      form.elements.marriageActive.value = conjugeAtivo.casamento_ativo === 'sim' ? 'Sim' : 'Não';
+    }
+    if (form.elements.marriageEndDate && conjugeAtivo.data_fim_casamento) {
+      form.elements.marriageEndDate.value = conjugeAtivo.data_fim_casamento.split('T')[0];
+    }
+  }
+
+  updateSpouseVisibility();
 }
 async function restore() {
   // Disable editing while restoring so that saved data cannot overwrite user input.
@@ -178,16 +235,19 @@ unionDropZone.addEventListener('drop', event => {
 form.addEventListener('submit', async event => {
   event.preventDefault();
   const isMarried = form.elements.maritalStatus.value === 'Casado';
+
+  // --- VALIDAÇÃO DOS CAMPOS DO FORMULÁRIO ---
   const checks = [
     ['maritalStatus', form.elements.maritalStatus.value !== '', 'Selecione o estado civil.'],
     ['name', form.elements.name.value.trim().length >= 3, 'Informe o nome completo.'],
     ['document', [11, 14].includes(digits(form.elements.document.value).length), 'Informe 11 dígitos para CPF ou 14 para CNPJ.', '#document-error'],
     ['birthDate', Boolean(form.elements.birthDate.value), 'Informe a data de nascimento.'],
     ['phone', [10, 11].includes(digits(form.elements.phone.value).length), 'Informe o telefone com DDD.'],
-    ['email', form.elements.email.value.trim() !== '', 'Informe o e-mail.'],
+    ['email', form.elements.email.value.trim() === '' || form.elements.email.checkValidity(), 'Informe um e-mail válido.'],
     ['postalCode', digits(form.elements.postalCode.value).length === 8, 'Informe os 8 dígitos do CEP.', '#postal-error'],
     ...['street', 'number', 'neighborhood', 'city', 'state'].map(key => [key, Boolean(form.elements[key].value.trim()), 'Preencha este campo.']),
   ];
+
   if (isMarried) {
     checks.push(['spouseName', form.elements.spouseName.value.trim().length >= 3, 'Informe o nome do cônjuge.']);
     checks.push(['spouseDocument', [11].includes(digits(form.elements.spouseDocument.value).length), 'Informe o CPF do cônjuge.']);
@@ -199,28 +259,36 @@ form.addEventListener('submit', async event => {
       checks.push(['marriageEndDate', Boolean(form.elements.marriageEndDate.value), 'Informe a data fim do casamento.']);
     }
   }
+
   for (const [key, valid, message, errorSelector] of checks) {
     if (!form.elements[key]) continue;
     form.elements[key].setCustomValidity(valid ? '' : message);
     if (errorSelector) document.querySelector(errorSelector).textContent = valid ? '' : message;
   }
-  if (!proof.files[0]) {
+
+  if (!clientId && !proof.files[0]) {
     fileError.textContent = 'Faça o upload do comprovante de residência.';
     proof.setCustomValidity('Faça o upload do comprovante de residência.');
+  } else {
+    proof.setCustomValidity('');
   }
-  if (isMarried && !unionProof.files[0]) {
+
+  if (!clientId && isMarried && !unionProof.files[0]) {
     unionFileError.textContent = 'Faça o upload do comprovante de união.';
     unionProof.setCustomValidity('Faça o upload do comprovante de união.');
+  } else {
+    unionFileError.textContent = '';
+    if (unionProof) unionProof.setCustomValidity('');
   }
+
   if (!form.reportValidity()) return;
   if (fileError.textContent) { proof.focus(); return; }
   if (isMarried && unionFileError.textContent) { unionProof.focus(); return; }
-  const client = Object.fromEntries(Object.keys(initialClient).map(key => [key, form.elements[key].value.trim()]));
+
   const button = form.querySelector('[type=submit]');
   button.disabled = true;
   status.textContent = clientId ? 'Salvando alterações...' : 'Cadastrando cliente...';
 
-  // Mapeamento inverso do Estado Civil para os enums minúsculos do Prisma
   const estadoCivilMapReverse = {
     'Solteiro': 'solteiro',
     'Casado': 'casado',
@@ -228,44 +296,115 @@ form.addEventListener('submit', async event => {
     'Viúvo': 'viuvo'
   };
 
-  // Cria um objeto FormData compatível com o middleware multer
-  const formData = new FormData();
-  formData.append('nome', form.elements.name.value.trim());
-  formData.append('cpf_cnpj', digits(form.elements.document.value));
-  formData.append('data_nascimento', `${form.elements.birthDate.value}T00:00:00.000Z`);
-  formData.append('telefone', form.elements.phone.value.trim());
-  formData.append('logradouro', form.elements.street.value.trim());
-  formData.append('numero', form.elements.number.value.trim());
-  formData.append('bairro', form.elements.neighborhood.value.trim());
-  formData.append('cidade', form.elements.city.value.trim());
-  formData.append('uf', form.elements.state.value);
-  formData.append('cep', digits(form.elements.postalCode.value));
-  formData.append('estado_civil', estadoCivilMapReverse[form.elements.maritalStatus.value] || 'solteiro');
-
-  const emailValue = form.elements.email ? form.elements.email.value.trim() : '';
-  if (emailValue !== "") {
-    formData.append('email', emailValue);
-  }
-
-  // Anexa o novo arquivo de comprovante caso o usuário tenha selecionado um
-  if (selectedFile) {
-    formData.append('url_comprovante_residencia', selectedFile);
-  }
-
   try {
-    // Se houver clientId faz PUT, se não houver faz POST (Cadastro)
-    const url = clientId ? `${API_BASE_URL}/cliente/${clientId}` : `${API_BASE_URL}/cliente`;
-    const method = clientId ? 'PUT' : 'POST';
+    let response;
 
-    const response = await fetch(url, {
-      method: method,
-      body: formData // Não define Content-Type manual, o browser gerencia o boundary multipart
-    });
+    if (clientId) {
+      // --- EDIÇÃO (PUT) com suporte a arquivos ---
+      const formData = new FormData();
+
+      // Campos do cliente
+      formData.append('nome', form.elements.name.value.trim());
+      formData.append('cpf_cnpj', digits(form.elements.document.value));
+      formData.append('data_nascimento', form.elements.birthDate.value);
+      formData.append('telefone', form.elements.phone.value.trim());
+      formData.append('logradouro', form.elements.street.value.trim());
+      formData.append('numero', form.elements.number.value.trim());
+      formData.append('bairro', form.elements.neighborhood.value.trim());
+      formData.append('cidade', form.elements.city.value.trim());
+      formData.append('uf', form.elements.state.value);
+      formData.append('cep', digits(form.elements.postalCode.value));
+      formData.append('estado_civil', estadoCivilMapReverse[form.elements.maritalStatus.value] || 'solteiro');
+
+      if (form.elements.email.value.trim()) {
+        formData.append('email', form.elements.email.value.trim());
+      }
+
+      // Se houver um NOVO comprovante de residência selecionado
+      if (selectedFile) {
+        formData.append('comprovante_residencia', selectedFile);
+      }
+
+      // Dados do Cônjuge para o PUT
+      if (isMarried) {
+        const conjugeData = {
+          cpf: digits(form.elements.spouseDocument.value),
+          conjuge_cpf: digits(form.elements.spouseDocument.value),
+          nome: form.elements.spouseName.value.trim(),
+          conjuge_nome: form.elements.spouseName.value.trim(),
+          regime_bens: form.elements.spousePropertyRegime.value,
+          data_nascimento: form.elements.spouseBirthDate.value || undefined,
+          data_casamento: form.elements.marriageDate.value || undefined,
+          casamento_ativo: form.elements.marriageActive.value === 'Sim' ? 'sim' : 'nao',
+          data_fim_casamento: form.elements.marriageActive.value === 'Não' ? (form.elements.marriageEndDate.value || null) : null
+        };
+
+        // Se houver um NOVO comprovante de união selecionado
+        if (selectedUnionProof) {
+          formData.append('comprovante_uniao', selectedUnionProof);
+        }
+
+        // Envia os campos do cônjuge serializados ou individuais
+        formData.append('conjuge', JSON.stringify(conjugeData));
+      } else if (form.elements.maritalStatus.value === 'Divorciado') {
+        formData.append('conjuge', JSON.stringify({
+          data_fim_casamento: form.elements.marriageEndDate.value || new Date().toISOString()
+        }));
+      }
+
+      // ATENÇÃO: Ao enviar FormData, NÃO passe a header 'Content-Type'. O navegador gera o boundary automaticamente.
+      response = await fetch(`${API_BASE_URL}/cliente/${clientId}`, {
+        method: 'PUT',
+        body: formData
+      });
+
+    } else {
+      // ... (mantém o bloco POST como já está) ...
+      // --- CADASTRO (POST) ---
+      const formData = new FormData();
+      formData.append('nome', form.elements.name.value.trim());
+      formData.append('cpf_cnpj', digits(form.elements.document.value));
+      formData.append('data_nascimento', form.elements.birthDate.value);
+      formData.append('telefone', form.elements.phone.value.trim());
+      formData.append('logradouro', form.elements.street.value.trim());
+      formData.append('numero', form.elements.number.value.trim());
+      formData.append('bairro', form.elements.neighborhood.value.trim());
+      formData.append('cidade', form.elements.city.value.trim());
+      formData.append('uf', form.elements.state.value);
+      formData.append('cep', digits(form.elements.postalCode.value));
+      formData.append('estado_civil', estadoCivilMapReverse[form.elements.maritalStatus.value] || 'solteiro');
+
+      if (form.elements.email.value.trim()) {
+        formData.append('email', form.elements.email.value.trim());
+      }
+
+      if (selectedFile) {
+        formData.append('comprovante_residencia', selectedFile);
+      }
+
+      if (isMarried) {
+        formData.append('conjuge_nome', form.elements.spouseName.value.trim());
+        formData.append('conjuge_cpf', digits(form.elements.spouseDocument.value));
+        formData.append('conjuge_data_nascimento', form.elements.spouseBirthDate.value);
+        formData.append('regime_bens', form.elements.spousePropertyRegime.value);
+        formData.append('data_casamento', form.elements.marriageDate.value);
+        formData.append('casamento_ativo', form.elements.marriageActive.value === 'Sim' ? 'sim' : 'nao');
+
+        if (selectedUnionProof) {
+          formData.append('comprovante_uniao', selectedUnionProof);
+        }
+      }
+
+      response = await fetch(`${API_BASE_URL}/cliente`, {
+        method: 'POST',
+        body: formData
+      });
+    }
 
     const responseData = await response.json();
 
     if (!response.ok) {
-      throw new Error(responseData.mensagem || responseData.erro || 'Erro na operação no banco de dados.');
+      throw new Error(responseData.erro || responseData.mensagem || 'Erro na operação.');
     }
 
     dirty = false;
@@ -277,15 +416,3 @@ form.addEventListener('submit', async event => {
     button.disabled = false;
   }
 });
-window.addEventListener('beforeunload', event => {
-  if (dirty) { event.preventDefault(); event.returnValue = ''; }
-});
-document.querySelectorAll('[data-section]').forEach(button => button.addEventListener('click', () => {
-  if (button.dataset.section === 'Clientes') {
-    document.querySelector('#name').focus();
-    return;
-  }
-  document.querySelector('#navigation-message').textContent = `A seção “${button.dataset.section}” ainda não está disponível. Esta versão apresenta a edição de cliente.`;
-  document.querySelector('#navigation-dialog').showModal();
-}));
-

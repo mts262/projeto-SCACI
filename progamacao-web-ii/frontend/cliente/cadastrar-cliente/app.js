@@ -99,7 +99,6 @@ function setupUpload(dropZoneId, inputId, fileNameId) {
 setupUpload('drop-zone', 'proof', 'file-name');
 setupUpload('spouse-drop-zone', 'unionProof', 'spouse-file-name');
 
-<<<<<<< HEAD:progamacao-web-ii/frontend/cliente/cadastrar-cliente/app.js
 const dropZone = document.querySelector('#drop-zone');
 ['dragenter', 'dragover'].forEach(type => dropZone.addEventListener(type, e => e.preventDefault()));
 ['dragleave', 'drop'].forEach(type => dropZone.addEventListener(type, e => e.preventDefault()));
@@ -205,24 +204,6 @@ form.addEventListener('submit', async event => {
     status.textContent = error.message;
   } finally {
     button.disabled = false;
-=======
-// Busca CEP Automática (ViaCEP API)
-document.getElementById('postalCode').addEventListener('blur', async (e) => {
-  const cep = e.target.value.replace(/\D/g, '');
-  if (cep.length === 8) {
-    try {
-      const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-      const data = await res.json();
-      if (!data.erro) {
-        document.getElementById('street').value = data.logradouro;
-        document.getElementById('neighborhood').value = data.bairro;
-        document.getElementById('city').value = data.localidade;
-        document.getElementById('state').value = data.uf;
-      }
-    } catch (err) {
-      console.error('Erro ao buscar CEP:', err);
-    }
->>>>>>> 02b2258 (Atualiza arquivos do formulario Cadastrar_Cliente com secao de conjugue):progamacao-web-ii/FrontEnd/Cadastrar_Cliente/app.js
   }
 });
 

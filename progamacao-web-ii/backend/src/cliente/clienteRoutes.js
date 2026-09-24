@@ -4,32 +4,30 @@ import {
   editarCliente,
   excluirCliente,
   pesquisarCliente,
-  buscarClientePorId 
+  buscarClientePorId
 } from "./clienteController.js";
 import { upload } from "../middlewares/upload.js";
 
 const router = express.Router();
 
+const camposUpload = upload.fields([
+  { name: "comprovante_residencia", maxCount: 1 },
+  { name: "comprovante_uniao", maxCount: 1 }
+]);
+
 // Cadastrar cliente
-router.post(
-    "/cliente",
-    upload.fields([
-        { name: "comprovante_residencia", maxCount: 1 },
-        { name: "comprovante_uniao", maxCount: 1 }
-    ]),
-    cadastrarCliente
-);
+router.post("/cliente", camposUpload, cadastrarCliente);
+
+// Listar / Pesquisar todos os clientes
+router.get("/clientes", pesquisarCliente);
+
+// Buscar um cliente por ID
+router.get("/cliente/:id_cliente", buscarClientePorId);
+
+// Editar cliente por ID
+router.put("/cliente/:id_cliente", camposUpload, editarCliente);
 
 // Excluir cliente por ID
 router.delete("/cliente/:id_cliente", excluirCliente);
-
-// Editar cliente por ID
-router.put("/cliente/:id_cliente", editarCliente);
-
-// Listar / Buscar clientes
-router.get("/clientes", pesquisarCliente);
-
-// Busca um cliente pelo seu id
-router.get("/cliente/:id_cliente", buscarClientePorId);
 
 export default router;
