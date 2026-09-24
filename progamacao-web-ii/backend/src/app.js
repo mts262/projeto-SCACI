@@ -9,6 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(clienteRoutes);
+app.use("/uploads", express.static("uploads"));
 
 
 app.listen(3000, async () => {

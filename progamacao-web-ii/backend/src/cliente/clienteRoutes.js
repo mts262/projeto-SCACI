@@ -1,23 +1,49 @@
 import express from "express";
-import { 
-  cadastrarCliente, 
-  editarCliente, 
+import multer from 'multer';
+import {
+  cadastrarCliente,
+  editarCliente,
   excluirCliente,
-  // listarClientes // Descomente caso tenha criado a função de listagem/busca
+  pesquisarCliente // Descomente caso tenha criado a função de listagem/busca
 } from "./clienteController.js";
+
 
 const router = express.Router();
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        if (file.fieldname === "comprovante_residencia") {
+            cb(null, "uploads/comprovantes-residencia/");
+        } else if (file.fieldname === "comprovante_uniao") {
+            cb(null, "uploads/comprovantes-uniao/");
+        }
+    }
+});
+
+const upload = multer({ storage });
+
+
 // Cadastrar cliente
-router.post("/cliente", cadastrarCliente);
+router.post(
+    "/cliente",
+    upload.fields([
+        { name: "comprovante_residencia", maxCount: 1 },
+        { name: "comprovante_uniao", maxCount: 1 }
+    ]),
+    cadastrarCliente
+);
+
 
 // Excluir cliente por ID
 router.delete("/cliente/:id_cliente", excluirCliente);
 
+
 // Editar cliente por ID
 router.put("/cliente/:id_cliente", editarCliente);
 
+
 // (Opcional) Listar / Buscar clientes
-// router.get("/clientes", listarClientes);
+router.get("/clientes", pesquisarCliente);
+
 
 export default router;

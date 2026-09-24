@@ -16,7 +16,8 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mariadb": "^3.5.4"
+    "mariadb": "^3.5.4",
+    "multer": "^2.4.0"
   },
   "devDependencies": {
     "@types/node": "^26.5.1",

@@ -77,7 +77,7 @@ dropZone.addEventListener('drop', e => chooseFile(e.dataTransfer.files[0]));
 // Submissão do Formulário
 form.addEventListener('submit', async event => {
   event.preventDefault();
-  
+ 
   const checks = [
     ['name', form.elements.name.value.trim().length >= 3, 'Informe o nome completo.'],
     ['document', [11, 14].includes(digits(form.elements.document.value).length), 'CPF ou CNPJ inválido.', '#document-error'],
@@ -100,10 +100,6 @@ form.addEventListener('submit', async event => {
       data_nascimento: form.elements.birthDate.value,
       telefone: form.elements.phone.value,
       email: form.elements.email.value.trim() || null,
-
-      // URL temporária até definir com a equipe o serviço de armazenamento dos arquivos
-      url_comprovante_residencia: "http://doc/res211.pdf", 
-      
       logradouro: form.elements.street.value,
       numero: form.elements.number.value,
       bairro: form.elements.neighborhood.value,
@@ -112,12 +108,15 @@ form.addEventListener('submit', async event => {
       uf: form.elements.state.value,
       cep: digits(form.elements.postalCode.value),
       estado_civil: form.elements.maritalStatus.value
-      
+     
     };
 
+    let casado = false;
     if (dadosCliente.estado_civil === "casado") {
       // Dados do cônjuge — preencher quando os campos forem adicionados ao formulário
       /*
+      casado = true;
+     
       dadosCliente.conjuge_cpf = ...;
       dadosCliente.conjuge_nome = ...;
       dadosCliente.regime_bens = ...;
@@ -129,12 +128,24 @@ form.addEventListener('submit', async event => {
       */
     }
 
+    const formData = new FormData();
+
+    for (const [campo, valor] of Object.entries(dadosCliente)) {
+      formData.append(campo, valor ?? '');
+    }
+
+    formData.append('comprovante_residencia', form.elements.proof.files[0]);
+
+    // para qaundo tiver os dados de cônjuge
+    /*
+    if (casado) {
+      formData.append('comprovante_uniao', form.elements.conjugeProof.files[0]);
+    }
+    */
+   
     const resposta = await fetch('http://localhost:3000/cliente', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(dadosCliente)
+      body: formData
     });
 
     const resultado = await resposta.json();
