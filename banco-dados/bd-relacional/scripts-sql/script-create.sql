@@ -201,8 +201,9 @@ ALTER TABLE Agenda_Visita ADD CONSTRAINT FK_Agenda_Visita_4
  
 ALTER TABLE Conjuge ADD CONSTRAINT FK_Conjuge_1
     FOREIGN KEY (id_cliente)
-    REFERENCES Cliente (id_cliente);
- 
+    REFERENCES Cliente (id_cliente)
+    ON DELETE CASCADE;
+    
 ALTER TABLE Casa_Ape ADD CONSTRAINT FK_Casa_Ape_2
     FOREIGN KEY (id_imovel)
     REFERENCES Imovel (id_imovel)
