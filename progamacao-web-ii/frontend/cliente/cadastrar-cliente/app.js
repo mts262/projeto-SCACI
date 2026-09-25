@@ -297,9 +297,24 @@ form.addEventListener('submit', async event => {
 });
 
 // Navegação do menu
-document.querySelectorAll('[data-section]').forEach(button => button.addEventListener('click', () => {
-  if (button.dataset.section !== 'Clientes') {
-    document.querySelector('#navigation-message').textContent = `A seção “${button.dataset.section}” ainda não está disponível.`;
-    document.querySelector('#navigation-dialog').showModal();
-  }
-}));
+document.querySelectorAll('[data-section]').forEach(button => {
+    button.addEventListener('click', () => {
+
+        const secao = button.dataset.section;
+
+        if (secao === 'Início') {
+            window.location.href = '../../tela-inicial/index.html';
+            return;
+        }
+
+        if (secao === 'Clientes') {
+            window.location.href = '../acoes-cliente/index.html';
+            return;
+        }
+
+        document.querySelector('#navigation-message').textContent =
+            `A seção “${secao}” ainda não está disponível.`;
+
+        document.querySelector('#navigation-dialog').showModal();
+    });
+});

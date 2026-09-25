@@ -129,22 +129,102 @@ function renderResults(filtered) {
 
   if (!filtered.length) {
     setFeedback('Cliente não encontrado!');
-    resultsBody.innerHTML = '<tr><td colspan="4" class="empty-state">Nenhum cliente encontrado para os filtros informados.</td></tr>';
+    resultsBody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum cliente encontrado para os filtros informados.</td></tr>';
     return;
   }
 
   setFeedback('');
   const rows = filtered.slice(0, 5).map(client => `
-    <tr>
-      <td>${client.name}</td>
-      <td>${client.document}</td>
-      <td>${client.phone}</td>
-      <td>${client.email}</td>
-    </tr>
-  `).join('');
+  <tr>
+    <td>${client.name}</td>
+    <td>${client.document}</td>
+    <td>${client.phone}</td>
+    <td>${client.email}</td>
+
+    <td class="row-actions">
+      <button
+        type="button"
+        class="row-actions__button"
+        aria-label="Ações de ${client.name}"
+        aria-expanded="false"
+      >
+        …
+      </button>
+
+      <div class="row-actions__menu" hidden>
+        <button type="button" data-acao="editar" data-id="${client.id_cliente}">
+          Editar
+        </button>
+
+        <button type="button" data-acao="excluir" data-id="${client.id_cliente}">
+          Excluir
+        </button>
+      </div>
+    </td>
+  </tr>
+`).join('');
 
   resultsBody.innerHTML = rows;
 }
+
+resultsBody.addEventListener('click', event => {
+
+  const botao = event.target.closest('.row-actions__button');
+
+  if (botao) {
+
+    document.querySelectorAll('.row-actions__menu').forEach(menu => {
+      menu.hidden = true;
+    });
+
+    document.querySelectorAll('.row-actions__button').forEach(button => {
+      button.setAttribute('aria-expanded', 'false');
+    });
+
+    const menu = botao.nextElementSibling;
+    const rect = botao.getBoundingClientRect();
+
+    menu.style.top = `${rect.bottom + 6}px`;
+    menu.style.left = `${rect.right - 150}px`;
+
+    menu.hidden = false;
+    botao.setAttribute('aria-expanded', 'true');
+
+    return;
+  }
+
+  const acao = event.target.closest('[data-acao]');
+
+  if (!acao) {
+    return;
+  }
+
+  const id = acao.dataset.id;
+
+  if (acao.dataset.acao === 'editar') {
+    window.location.href = `../editar-cliente/index.html?id=${id}`;
+    return;
+  }
+
+  if (acao.dataset.acao === 'excluir') {
+    window.location.href = `../excluir-cliente/index.html?id=${id}`;
+  }
+});
+
+document.addEventListener('click', event => {
+
+  if (event.target.closest('.row-actions')) {
+    return;
+  }
+
+  document.querySelectorAll('.row-actions__menu').forEach(menu => {
+    menu.hidden = true;
+  });
+
+  document.querySelectorAll('.row-actions__button').forEach(button => {
+    button.setAttribute('aria-expanded', 'false');
+  });
+});
 
 form.addEventListener('submit', event => {
   event.preventDefault();
@@ -153,7 +233,7 @@ form.addEventListener('submit', event => {
   if (!query) {
     setFeedback('Informe um valor para pesquisar!');
     resultsSummary.textContent = `Exibindo 0 de ${clients.length} clientes`;
-    resultsBody.innerHTML = '<tr><td colspan="4" class="empty-state">Nenhum cliente encontrado para os filtros informados.</td></tr>';
+    resultsBody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum cliente encontrado para os filtros informados.</td></tr>';
     return;
   }
 
@@ -186,3 +266,25 @@ cityInput.addEventListener('input', filterClients);
 ufSelect.addEventListener('change', filterClients);
 
 renderResults(clients);
+
+document.querySelectorAll('[data-section]').forEach(button => {
+    button.addEventListener('click', () => {
+
+        const secao = button.dataset.section;
+
+        if (secao === 'Início') {
+            window.location.href = '../../tela-inicial/index.html';
+            return;
+        }
+
+        if (secao === 'Clientes') {
+            window.location.href = '../acoes-cliente/index.html';
+            return;
+        }
+
+        document.querySelector('#navigation-message').textContent =
+            `A seção “${secao}” ainda não está disponível.`;
+
+        document.querySelector('#navigation-dialog').showModal();
+    });
+});

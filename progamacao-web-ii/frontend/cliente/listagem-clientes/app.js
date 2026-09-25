@@ -403,20 +403,24 @@ window.addEventListener("resize", fecharMenuAcoes);
 
 
 botoesMenu.forEach((botao) => {
+    botao.addEventListener("click", () => {
 
-botao.addEventListener("click", () => {
+        const secao = botao.dataset.secao;
 
-if (botao.dataset.secao === "Clientes") {
+        if (secao === "Início") {
+            window.location.href = "../../tela-inicial/index.html";
+            return;
+        }
 
-return;
+        if (secao === "Clientes") {
+            window.location.href = "../acoes-cliente/index.html";
+            return;
+        }
 
-}
-
-
-mostrarAviso(`O módulo ${botao.dataset.secao} ainda não está disponível nesta versão.`);
-
-});
-
+        mostrarAviso(
+            `O módulo ${secao} ainda não está disponível nesta versão.`
+        );
+    });
 });
 
 

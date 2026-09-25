@@ -41,54 +41,53 @@
       </nav>
 
       <section class="content" aria-labelledby="page-title">
-        <div class="page-header">
-          <div>
-            <p class="eyebrow">Módulo de gestão</p>
-            <h1 id="page-title">Clientes <span>e ações</span></h1>
-          </div>
+        <div class="welcome-block">
+          <p class="eyebrow">Início</p>
+          <h1 id="page-title">Olá, <span>Kleber Vieira</span></h1>
         </div>
 
         <section class="panel actions-panel" aria-labelledby="actions-title">
           <div class="panel-header">
-            <h2 id="actions-title">Ações do cliente</h2>
-            <span class="panel-tag">Menu rápido</span>
+            <h2 id="actions-title">Ações</h2>
           </div>
 
           <div class="action-grid">
-            <a class="action-card" href="./Cadastrar_Cliente/index.html">
-              <span class="card-icon">＋</span>
-              <div>
-                <h3>Cadastrar Cliente</h3>
-                <p>Adicionar novo cliente ao sistema.</p>
-              </div>
-            </a>
-
-            <a class="action-card" href="../Front-Pesquisar_Cliente/index.html">
-              <span class="card-icon">⌕</span>
-              <div>
-                <h3>Pesquisar</h3>
-                <p>Localizar cadastros por filtros.</p>
-              </div>
-            </a>
-
-            <a class="action-card" href="../Front-Editar_Cliente/index.html">
+            <button type="button" class="action-card" data-action="editar-venda">
               <span class="card-icon">✎</span>
               <div>
-                <h3>Editar</h3>
-                <p>Atualizar dados e documentos do cliente.</p>
+                <h3>Editar venda</h3>
               </div>
-            </a>
+            </button>
 
-            <button type="button" class="action-card" data-action="excluir">
-              <span class="card-icon">−</span>
+            <button type="button" class="action-card" data-action="nova-venda">
+              <span class="card-icon">＋</span>
               <div>
-                <h3>Excluir</h3>
-                <p>Remover cadastro selecionado.</p>
+                <h3>Nova venda</h3>
               </div>
             </button>
           </div>
         </section>
 
+        <section class="sales-panel" aria-labelledby="sales-title">
+          <h2 id="sales-title">Confira suas vendas:</h2>
+
+          <div class="sales-list">
+            <button type="button" class="sale-item" data-action="andamento">
+              <span class="sale-dot dot-1"></span>
+              <span>Vendas em andamento</span>
+            </button>
+
+            <button type="button" class="sale-item" data-action="abertas">
+              <span class="sale-dot dot-2"></span>
+              <span>Vendas abertas</span>
+            </button>
+
+            <button type="button" class="sale-item" data-action="concluidas">
+              <span class="sale-dot dot-3"></span>
+              <span>Vendas concluídas</span>
+            </button>
+          </div>
+        </section>
       </section>
     </main>
 

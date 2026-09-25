@@ -447,3 +447,57 @@ tbody tr:hover {
     gap: 6px;
   }
 }
+
+.row-actions {
+  position: relative;
+  width: 64px;
+  text-align: right;
+}
+
+.row-actions__button {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.row-actions__button:hover,
+.row-actions__button[aria-expanded="true"] {
+  background: var(--soft);
+}
+
+.row-actions__menu {
+  position: fixed;
+  z-index: 10;
+  display: grid;
+  min-width: 150px;
+  padding: 6px;
+  background: var(--soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.45);
+}
+
+.row-actions__menu[hidden] {
+  display: none;
+}
+
+.row-actions__menu button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 9px 12px;
+}
+
+.row-actions__menu button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}

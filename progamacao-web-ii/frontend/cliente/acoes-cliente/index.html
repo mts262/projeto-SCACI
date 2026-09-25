@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1c1c1b" />
+    <title>Clientes | S.C.A.C.I.</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="brand" aria-label="S.C.A.C.I.">
+      <span>S.C.A.</span><span>C.I.</span>
+    </header>
+
+    <aside class="sidebar" aria-label="Menu principal">
+      <p class="menu-title">Menu</p>
+      <nav>
+        <button type="button" data-section="Início">Início</button>
+        <button type="button" aria-current="page" data-section="Clientes">Clientes</button>
+        <button type="button" data-section="Compradores">Compradores</button>
+        <button type="button" data-section="Imóveis">Imóveis</button>
+        <button type="button" data-section="Vendas">Vendas</button>
+        <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
+        <button type="button" data-section="Funcionários">Funcionários</button>
+        <button type="button" data-section="Corretores">Corretores</button>
+      </nav>
+    </aside>
+
+    <main id="conteudo" tabindex="-1">
+      <nav class="breadcrumb" aria-label="Localização">
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+          <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-9.5Z" />
+        </svg>
+        <span class="chevron" aria-hidden="true">‹</span>
+        <ol>
+          <li>Início</li>
+          <li>Clientes</li>
+          <li aria-current="page">Tela inicial</li>
+        </ol>
+      </nav>
+
+      <section class="content" aria-labelledby="page-title">
+        <div class="page-header">
+          <div>
+            <p class="eyebrow">Módulo de gestão</p>
+            <h1 id="page-title">Clientes <span>e ações</span></h1>
+          </div>
+        </div>
+
+        <section class="panel actions-panel" aria-labelledby="actions-title">
+          <div class="panel-header">
+            <h2 id="actions-title">Ações do cliente</h2>
+            <span class="panel-tag">Menu rápido</span>
+          </div>
+
+          <div class="action-grid">
+            <button type="button" class="action-card" data-action="cadastrar">
+              <span class="card-icon">＋</span>
+              <div>
+                <h3>Cadastrar Cliente</h3>
+                <p>Adicionar novo cliente ao sistema.</p>
+              </div>
+            </button>
+
+            <button type="button" class="action-card" data-action="pesquisa">
+              <span class="card-icon">⌕</span>
+              <div>
+                <h3>Pesquisar</h3>
+                <p>Localizar cadastros por filtros.</p>
+              </div>
+            </button>
+
+            <button type="button" class="action-card" data-action="editar">
+              <span class="card-icon">✎</span>
+              <div>
+                <h3>Editar</h3>
+                <p>Atualizar dados e documentos do cliente.</p>
+              </div>
+            </button>
+
+            <button type="button" class="action-card" data-action="excluir">
+              <span class="card-icon">−</span>
+              <div>
+                <h3>Excluir</h3>
+                <p>Remover cadastro selecionado.</p>
+              </div>
+            </button>
+          </div>
+        </section>
+
+      </section>
+    </main>
+
+    <dialog id="navigation-dialog" aria-labelledby="dialog-title">
+      <h2 id="dialog-title">Módulo em desenvolvimento</h2>
+      <p id="navigation-message">Essa funcionalidade ainda não está disponível nesta versão.</p>
+      <form method="dialog">
+        <button class="primary-button" type="submit">Voltar</button>
+      </form>
+    </dialog>
+  </body>
+</html>

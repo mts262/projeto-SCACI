@@ -16,14 +16,14 @@
     <aside class="sidebar" aria-label="Menu principal">
       <p class="menu-title">Menu</p>
       <nav>
-        <button type="button">Início</button>
-        <button type="button" aria-current="page">Clientes</button>
-        <button type="button">Compradores</button>
-        <button type="button">Imóveis</button>
-        <button type="button">Vendas</button>
-        <button type="button">Agenda de Visita</button>
-        <button type="button">Funcionários</button>
-        <button type="button">Corretores</button>
+        <button type="button" data-section="Início">Início</button>
+        <button type="button" data-section="Clientes" aria-current="page">Clientes</button>
+        <button type="button" data-section="Compradores">Compradores</button>
+        <button type="button" data-section="Imóveis">Imóveis</button>
+        <button type="button" data-section="Vendas">Vendas</button>
+        <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
+        <button type="button" data-section="Funcionários">Funcionários</button>
+        <button type="button" data-section="Corretores">Corretores</button>
       </nav>
     </aside>
 
@@ -107,6 +107,7 @@
                   <th>CPF/CNPJ</th>
                   <th>Telefone</th>
                   <th>Email</th>
+                  <th scope="col"><span class="sr-only">Ações</span></th>
                 </tr>
               </thead>
               <tbody id="results-body"></tbody>
@@ -123,5 +124,13 @@
         </section>
       </section>
     </main>
+    <dialog id="navigation-dialog">
+      <h2>Módulo em desenvolvimento</h2>
+      <p id="navigation-message"></p>
+
+      <form method="dialog">
+        <button type="submit" class="primary-button">Voltar</button>
+      </form>
+    </dialog>
   </body>
 </html>
