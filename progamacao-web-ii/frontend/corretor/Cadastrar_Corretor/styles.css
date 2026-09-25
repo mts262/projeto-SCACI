@@ -1,0 +1,270 @@
+:root {
+  color-scheme: dark;
+  --page: #121212;
+  --panel: #181818;
+  --field: #2d2d2d;
+  --text: #eee;
+  --placeholder: #888;
+  --blue: #5b9bd5;
+  --gold: #e4bb5e;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--page);
+  color: var(--text);
+}
+
+* { 
+  box-sizing: border-box; 
+}
+
+body { 
+  margin: 0; 
+}
+
+button, input, select { 
+  font: inherit; 
+}
+
+button { 
+  cursor: pointer; 
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 400;
+  margin: 0 0 24px;
+}
+
+h1 span { 
+  color: var(--blue); 
+}
+
+.error { 
+  color: #ffabab; 
+  font-size: 12px; 
+  margin-top: 4px; 
+}
+
+.error:empty { 
+  display: none; 
+}
+
+/* Header & Sidebar */
+.brand {
+  height: 80px;
+  padding: 20px;
+  font: 28px Georgia, serif;
+  color: var(--blue);
+}
+
+.sidebar {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  width: 200px;
+  padding: 8px;
+}
+
+.menu-title { 
+  color: var(--gold); 
+  font-size: 14px; 
+  margin: 10px 16px 24px; 
+}
+
+.sidebar nav { 
+  display: grid; 
+  gap: 4px; 
+}
+
+.sidebar button {
+  border: 0;
+  text-align: left;
+  background: transparent;
+  color: #ccc;
+  font-size: 14px;
+  border-radius: 4px;
+  padding: 8px 16px;
+}
+
+.sidebar button:hover, 
+.sidebar button.active,
+.sidebar button[aria-current] { 
+  background: #282828; 
+}
+
+/* Main Content Layout */
+main {
+  margin-left: 200px;
+  background: var(--panel);
+  min-height: calc(100vh - 80px);
+  border-radius: 12px 0 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.breadcrumb {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #282828;
+  padding: 0 24px;
+  color: #777;
+  font-size: 13px;
+}
+
+.breadcrumb svg { 
+  width: 18px; 
+  height: 18px; 
+  fill: none; 
+  stroke: currentColor; 
+  stroke-width: 1.5; 
+}
+
+.breadcrumb ol { 
+  display: flex; 
+  list-style: none; 
+  padding: 0; 
+  margin: 0;
+  gap: 8px; 
+}
+
+.breadcrumb li + li:before { 
+  content: "/"; 
+  margin-right: 8px; 
+}
+
+.breadcrumb li:first-child { 
+  color: #aaa; 
+}
+
+.content {
+  padding: 32px 48px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Form Layout */
+form#broker-form { 
+  display: flex; 
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+}
+
+.form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 680px;
+  width: 100%;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+input:not([type="file"]), select {
+  width: 100%;
+  background: var(--field);
+  color: var(--text);
+  border: 1px solid #3d3d3d;
+  border-radius: 4px;
+  height: 42px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+input::placeholder { 
+  color: var(--placeholder); 
+}
+
+select {
+  appearance: none;
+  color: var(--placeholder);
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+select:valid { 
+  color: var(--text); 
+}
+
+/* Date Icon Specifics */
+.date-field { 
+  position: relative; 
+}
+
+.date-field .calendar-icon {
+  position: absolute;
+  left: 12px;
+  top: 11px;
+  width: 18px;
+  height: 18px;
+  color: var(--placeholder);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.date-field input { 
+  padding-left: 38px; 
+}
+
+/* Grid Rows */
+.cep-row { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 12px; 
+}
+
+.address-row { 
+  display: grid; 
+  grid-template-columns: 80px 1fr; 
+  gap: 12px; 
+}
+
+.city-row { 
+  display: grid; 
+  grid-template-columns: 1fr 80px; 
+  gap: 12px; 
+}
+
+.broker-type-field { 
+  width: 50%; 
+}
+
+/* Botão Salvar */
+.save-area {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.save-button {
+  border: 1px solid #555;
+  background: transparent;
+  color: #fff;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.save-button:hover {
+  background: #222;
+  border-color: #888;
+}
+
+#save-status { 
+  font-size: 13px; 
+  color: #b2ddbc; 
+  margin-bottom: 8px; 
+}
