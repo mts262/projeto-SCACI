@@ -8,6 +8,7 @@
 const PAGINA_TAMANHO = 11;
 
 const ROTA_EDITAR_CLIENTE = "../editar-cliente/index.html";
+const ROTA_EXCLUIR_CLIENTE = "../excluir-cliente/index.html";
 
 
 
@@ -346,10 +347,9 @@ if (acao === "editar") {
 
 
 if (acao === "excluir") {
-
-mostrarAviso("A exclusão de cliente será liberada em uma próxima etapa.");
-
-}
+        const id_cliente = botao.dataset.idCliente;
+        window.location.href = `${ROTA_EXCLUIR_CLIENTE}?id=${id_cliente}`;
+    }
 
 });
 
