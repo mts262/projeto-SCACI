@@ -80,7 +80,7 @@ function verificarDadosCliente(dados, casado, arquivosCliente) {
  * @author Pedro Lucas Dos Santos Xavier
  *
  * Valida os dados recebidos para a edição de um cliente.
- * Garante que a requisição não esteja vazia e que nenhum campo venha em branco ou nulo.
+ * Garante que a requisição não esteja vazia e ignora campos vazios de upload que não foram alterados.
  *
  * @param {Object} dados - Objeto contendo os campos do cliente e cônjuge a serem atualizados (req.body).
  * @returns {string|null} Retorna mensagem descritiva do erro ou null caso a validação seja bem-sucedida.
@@ -90,14 +90,21 @@ function verificarDadosEdicaoCliente(dados) {
         return "Forneça pelo menos um campo para atualizar";
     }
 
+    // Campos de arquivo e campos opcionais que podem vir vazios na edição do formulário
+    const camposIgnoradosNaValidacao = ["comprovante_residencia", "comprovante_uniao", "complemento", "email"];
+
     for (const [campo, valor] of Object.entries(dados)) {
+        // Ignora a validação de campos vazios para uploads ou campos opcionais
+        if (camposIgnoradosNaValidacao.includes(campo)) {
+            continue;
+        }
+
         if (valor === null || valor === undefined || (typeof valor === 'string' && valor.trim() === '')) {
             return `O campo ${campo} não pode ser vazio`;
         }
     }
     return null;
 }
-
 /**
  * @author Matheus Pereira Rodrigues
  *
@@ -260,13 +267,10 @@ async function buscarClientePorId(req, res) {
 }
 
 /**
- * @author Pedro Lucas Dos Santos Xavier
+ * @author Pedro Lucas Dos Santos Xavier & Matheus Pereira Rodrigues
  *
- * Atualiza os dados de um cliente existente e gerencia as regras de negócio de estado civil e cônjuges:
- * - Se alterado para Divorciado: Inativa o cônjuge atual preenchendo a data_fim_casamento sem excluir o histórico.
- * - Se alterado/mantido para Casado:
- *    a) Mesmo CPF: Atualiza as informações do cônjuge existente.
- *    b) CPF Diferente: Inativa casamentos anteriores e registra o novo cônjuge (Novo Casamento).
+ * Atualiza os dados de um cliente existente e gerencia as regras de negócio de estado civil, 
+ * cônjuges e substituição de arquivos (comprovantes).
  *
  * @param {Object} req - Objeto de requisição do Express (espera `req.params.id` e `req.body`).
  * @param {Object} res - Objeto de resposta do Express.
@@ -279,25 +283,50 @@ async function editarCliente(req, res) {
         return res.status(400).json({ mensagem: "O ID fornecido deve ser um número válido." });
     }
 
-    const dadosAtuais = req.body;
+    const dadosAtuais = { ...req.body };
+    const arquivosCliente = req.files;
 
-    const erro = verificarDadosEdicaoCliente(dadosAtuais);
+    // 1. Converte o objeto do cônjuge caso tenha sido enviado como string JSON via FormData
+    if (typeof dadosAtuais.conjuge === 'string') {
+        try {
+            dadosAtuais.conjuge = JSON.parse(dadosAtuais.conjuge);
+        } catch (e) {
+            console.error("Erro ao fazer parse do objeto conjuge:", e);
+        }
+    }
+
+    // 2. Processa a substituição do comprovante de residência se um novo arquivo foi enviado
+    if (arquivosCliente?.comprovante_residencia?.[0]) {
+        const arqResidencia = arquivosCliente.comprovante_residencia[0];
+        dadosAtuais.url_comprovante_residencia = `http://localhost:3000/uploads/comprovantes-residencia/${arqResidencia.filename}`;
+    }
+
+    // Separa o cônjuge dos dados do cliente
+    const { conjuge, ...dadosCliente } = dadosAtuais;
+
+    // 3. Validação dos campos do cliente
+    const erro = verificarDadosEdicaoCliente(dadosCliente);
     if (erro) {
+        // Se a validação falhar, apaga os novos arquivos recebidos para não acumular lixo no disco
+        excluirArquivosUpload(arquivosCliente);
         return res.status(400).json({ mensagem: erro });
     }
 
-    // Separa os dados do cônjuge das propriedades do cliente
-    const { conjuge, ...dadosCliente } = dadosAtuais;
-
-    // Tratamento de conversão de datas para os campos do cliente
+    // Treatmento de conversão de datas para os campos do cliente
     if (dadosCliente.data_nascimento) {
         dadosCliente.data_nascimento = new Date(dadosCliente.data_nascimento);
+    }
+
+    // 4. Processa a substituição do comprovante de união caso exista cônjuge e novo arquivo
+    if (arquivosCliente?.comprovante_uniao?.[0] && conjuge) {
+        const arqUniao = arquivosCliente.comprovante_uniao[0];
+        conjuge.url_comprovante_uniao = `http://localhost:3000/uploads/comprovantes-uniao/${arqUniao.filename}`;
     }
 
     try {
         const clienteAtualizado = await prisma.$transaction(async (tx) => {
 
-            // 1. Atualiza dados cadastrais do cliente
+            // 1. Atualiza dados cadastrais do cliente (incluindo a nova URL de residência, se houver)
             if (Object.keys(dadosCliente).length > 0) {
                 await tx.cliente.update({
                     where: { id_cliente: id },
@@ -337,7 +366,7 @@ async function editarCliente(req, res) {
                 });
 
                 if (conjugeExistente) {
-                    // Edição do cônjuge existente
+                    // Edição do cônjuge existente (substitui a URL se um novo comprovante foi enviado)
                     await tx.conjuge.update({
                         where: { id_cliente_cpf: { id_cliente: id, cpf: cpfConjuge } },
                         data: {
@@ -367,7 +396,7 @@ async function editarCliente(req, res) {
                             nome: conjuge.nome || conjuge.conjuge_nome,
                             regime_bens: conjuge.regime_bens,
                             data_nascimento: conjuge.data_nascimento ? new Date(conjuge.data_nascimento) : null,
-                            url_comprovante_uniao: conjuge.url_comprovante_uniao,
+                            url_comprovante_uniao: conjuge.url_comprovante_uniao || null,
                             data_casamento: new Date(conjuge.data_casamento),
                             casamento_ativo: "sim"
                         }
@@ -389,6 +418,9 @@ async function editarCliente(req, res) {
         return res.status(200).json(clienteAtualizado);
 
     } catch (error) {
+        // Se houver erro no banco de dados, limpa os arquivos salvos pelo Multer nessa requisição
+        excluirArquivosUpload(arquivosCliente);
+
         if (error.code === 'P2025') {
             return res.status(404).json({ erro: 'Cliente não encontrado.' });
         }
