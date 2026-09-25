@@ -8,7 +8,6 @@
 const PAGINA_TAMANHO = 11;
 
 const ROTA_EDITAR_CLIENTE = "../editar-cliente/index.html";
-const ROTA_EXCLUIR_CLIENTE = "../excluir-cliente/index.html";
 
 
 
@@ -294,99 +293,153 @@ function irParaPagina(pagina) {
     renderizarPaginacao();
 }
 
-// Listener delegado: sobrevive ao redesenho das linhas e evita um listener por botão.
-corpoTabela.addEventListener("click", (evento) => {
-    const botao = evento.target.closest("[data-acao]");
+ corpoTabela.addEventListener("click", (evento) => {
 
-    if (!botao) {
-        return;
-    }
+const botao = evento.target.closest("[data-acao]");
 
-    const acao = botao.dataset.acao;
 
-    if (acao === "abrir-menu") {
-        const menu = botao.parentElement.querySelector(".row-actions__menu");
-        const estavaAberto = !menu.hidden;
+if (!botao) {
 
-        fecharMenuAcoes();
+return;
 
-        if (!estavaAberto) {
-            menu.hidden = false;
-            botao.setAttribute("aria-expanded", "true");
-            posicionarMenuAcoes(botao, menu);
-        }
-
-        return;
-    }
-
-    fecharMenuAcoes();
-
-    if (acao === "editar") {
-        const id_cliente = botao.dataset.idCliente;
-        window.location.href = `${ROTA_EDITAR_CLIENTE}?id=${id_cliente}`;
-        return;
-    }
-
-    if (acao === "excluir") {
-        const id_cliente = botao.dataset.idCliente;
-        window.location.href = `${ROTA_EXCLUIR_CLIENTE}?id=${id_cliente}`;
-    }
-});
-
-paginacao.addEventListener("click", (evento) => {
-    const botao = evento.target.closest("[data-pagina]");
-
-    if (!botao || botao.disabled) {
-        return;
-    }
-
-    fecharMenuAcoes();
-    irParaPagina(Number(botao.dataset.pagina));
-});
-
-document.addEventListener("click", (evento) => {
-    if (!evento.target.closest(".row-actions")) {
-        fecharMenuAcoes();
-    }
-});
-
-document.addEventListener("keydown", (evento) => {
-    if (evento.key === "Escape") {
-        fecharMenuAcoes();
-    }
-});
-
-// O menu é `position: fixed`: rolar ou redimensionar o deixaria desalinhado.
-window.addEventListener("scroll", fecharMenuAcoes, true);
-window.addEventListener("resize", fecharMenuAcoes);
-
-botoesMenu.forEach((botao) => {
-    botao.addEventListener("click", () => {
-        if (botao.dataset.secao === "Clientes") {
-            return;
-        }
-
-        mostrarAviso(`O módulo ${botao.dataset.secao} ainda não está disponível nesta versão.`);
-    });
-});
-
-function atualizarLista() {
-    carregarClientes()
-        .then((lista) => {
-            clientes = lista;
-
-            // Garante que a página atual ainda existe
-            paginaAtual = Math.min(paginaAtual, totalPaginas());
-
-            renderizarTabela();
-            renderizarPaginacao();
-        })
-        .catch(() => {
-            clientes = [];
-            corpoTabela.innerHTML = '<tr><td colspan="5" class="empty-state">Não foi possível carregar os clientes.</td></tr>';
-            resumoTabela.textContent = "Exibindo 0 de 0 clientes";
-            paginacao.innerHTML = "";
-        });
 }
 
-window.addEventListener("pageshow", atualizarLista);
+
+const acao = botao.dataset.acao;
+
+
+if (acao === "abrir-menu") {
+
+const menu = botao.parentElement.querySelector(".row-actions__menu");
+
+const estavaAberto = !menu.hidden;
+
+
+fecharMenuAcoes();
+
+
+if (!estavaAberto) {
+
+menu.hidden = false;
+
+botao.setAttribute("aria-expanded", "true");
+
+posicionarMenuAcoes(botao, menu);
+
+}
+
+
+return;
+
+}
+
+
+fecharMenuAcoes();
+
+
+if (acao === "editar") {
+        const idCliente = botao.dataset.idCliente;
+        window.location.href = `${ROTA_EDITAR_CLIENTE}?id=${idCliente}`;
+        return;
+    }
+
+
+
+if (acao === "excluir") {
+
+mostrarAviso("A exclusão de cliente será liberada em uma próxima etapa.");
+
+}
+
+});
+
+
+paginacao.addEventListener("click", (evento) => {
+
+const botao = evento.target.closest("[data-pagina]");
+
+
+if (!botao || botao.disabled) {
+
+return;
+
+}
+
+
+fecharMenuAcoes();
+
+irParaPagina(Number(botao.dataset.pagina));
+
+});
+
+
+document.addEventListener("click", (evento) => {
+
+if (!evento.target.closest(".row-actions")) {
+
+fecharMenuAcoes();
+
+}
+
+});
+
+
+document.addEventListener("keydown", (evento) => {
+
+if (evento.key === "Escape") {
+
+fecharMenuAcoes();
+
+}
+
+});
+
+
+// O menu é `position: fixed`: rolar ou redimensionar o deixaria desalinhado.
+
+window.addEventListener("scroll", fecharMenuAcoes, true);
+
+window.addEventListener("resize", fecharMenuAcoes);
+
+
+botoesMenu.forEach((botao) => {
+
+botao.addEventListener("click", () => {
+
+if (botao.dataset.secao === "Clientes") {
+
+return;
+
+}
+
+
+mostrarAviso(`O módulo ${botao.dataset.secao} ainda não está disponível nesta versão.`);
+
+});
+
+});
+
+
+carregarClientes()
+
+.then((lista) => {
+
+clientes = lista;
+
+renderizarTabela();
+
+renderizarPaginacao();
+
+})
+
+.catch(() => {
+
+clientes = [];
+
+corpoTabela.innerHTML = '<tr><td colspan="5" class="empty-state">Não foi possível carregar os clientes.</td></tr>';
+
+resumoTabela.textContent = "Exibindo 0 de 0 clientes";
+
+paginacao.innerHTML = "";
+
+}); 
