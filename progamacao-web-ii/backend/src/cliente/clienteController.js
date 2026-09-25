@@ -1,5 +1,6 @@
 import prisma from "../database.js";
 import fs from "fs";
+import path from "path";
 
 /**
  * @author Matheus Pereira Rodrigues
@@ -108,9 +109,9 @@ function verificarDadosEdicaoCliente(dados) {
  * @returns {Promise<Object>} Retorna o registro do cônjuge criado.
  */
 async function cadastrarConjuge(dados, arquivosCliente, id_cliente, tx = prisma) {
-        const arquivo = arquivosCliente.comprovante_uniao[0];
+    const arquivo = arquivosCliente.comprovante_uniao[0];
 
-       const urlComprovante = `http://localhost:3000/uploads/comprovantes-uniao/${arquivo.filename}`;
+    const urlComprovante = `http://localhost:3000/uploads/comprovantes-uniao/${arquivo.filename}`;
 
     return await tx.conjuge.create({
         data: {
@@ -397,6 +398,49 @@ async function editarCliente(req, res) {
 
 /**
  * @author Matheus Pereira Rodrigues
+ * 
+ * Exclui da pasta uploads os arquivos de clientes que serão excluídos do BD
+ * 
+ * @param {Object} cliente - o clinete que será excluído
+ */
+function excluirArquivosCliente(cliente) {
+    if (cliente.url_comprovante_residencia) {
+        const nomeArquivo = path.basename(
+            new URL(cliente.url_comprovante_residencia).pathname
+        );
+
+        const caminho = path.join(
+            "uploads",
+            "comprovantes-residencia",
+            nomeArquivo
+        );
+
+        if (fs.existsSync(caminho)) {
+            fs.unlinkSync(caminho);
+        }
+    }
+
+    for (const conjuge of cliente.conjuge) {
+        if (conjuge.url_comprovante_uniao) {
+            const nomeArquivo = path.basename(
+                new URL(conjuge.url_comprovante_uniao).pathname
+            );
+
+            const caminho = path.join(
+                "uploads",
+                "comprovantes-uniao",
+                nomeArquivo
+            );
+
+            if (fs.existsSync(caminho)) {
+                fs.unlinkSync(caminho);
+            }
+        }
+    }
+}
+
+/**
+ * @author Matheus Pereira Rodrigues
  *
  * Exclui um cliente do banco de dados pelo seu ID.
  *
@@ -412,11 +456,26 @@ async function excluirCliente(req, res) {
     }
 
     try {
+        const cliente = await prisma.cliente.findUnique({
+            where: {
+                id_cliente: id
+            },
+            include: {
+                conjuge: true
+            }
+        });
+
+        if (!cliente) {
+            return res.status(404).json({erro: "Cliente não encontrado!"});
+        }
+
         await prisma.cliente.delete({
             where: {
                 id_cliente: id
             }
         });
+
+        excluirArquivosCliente(cliente);
 
         return res.status(200).json({ mensagem: 'Cliente excluído com sucesso!' });
 
