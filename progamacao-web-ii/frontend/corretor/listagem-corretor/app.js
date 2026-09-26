@@ -1,9 +1,9 @@
 const PAGINA_TAMANHO = 11;
 
-const ROTA_EDITAR_CLIENTE = "../editar-corretor/index.html";
-const ROTA_EXCLUIR_CLIENTE = "../excluir-corretor/index.html";
+const ROTA_EDITAR_CORRETOR = "../editar-corretor/index.html";
+const ROTA_EXCLUIR_CORRETOR = "../excluir-corretor/index.html";
 
-async function carregarcorretores() {
+async function carregarCorretores() {
     const resposta = await fetch("http://localhost:3000/corretores");
 
     if (!resposta.ok) {
@@ -100,7 +100,7 @@ function mostrarAviso(mensagem) {
 
 function renderizarTabela() {
     if (!corretores.length) {
-        corpoTabela.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum cliente cadastrado.</td></tr>';
+        corpoTabela.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum corretor cadastrado.</td></tr>';
         resumoTabela.textContent = "Exibindo 0 de 0 corretores";
         return;
     }
@@ -108,12 +108,12 @@ function renderizarTabela() {
     const inicio = (paginaAtual - 1) * PAGINA_TAMANHO;
     const pagina = corretores.slice(inicio, inicio + PAGINA_TAMANHO);
 
-    corpoTabela.innerHTML = pagina.map((cliente) => `
+    corpoTabela.innerHTML = pagina.map((corretor) => `
       <tr>
-        <td>${escaparHtml(cliente.nome)}</td>
-        <td>${escaparHtml(formatarDocumento(cliente.cpf_cnpj))}</td>
-        <td>${escaparHtml(formatarTelefone(cliente.telefone))}</td>
-        <td>${escaparHtml(cliente.email || "—")}</td>
+        <td>${escaparHtml(corretor.nome)}</td>
+        <td>${escaparHtml(formatarDocumento(corretor.cpf_cnpj))}</td>
+        <td>${escaparHtml(corretor.creci_corretor)}</td>
+        <td>${escaparHtml(corretor.email || "—")}</td>
         <td class="row-actions">
           <button
             type="button"
@@ -121,11 +121,16 @@ function renderizarTabela() {
             data-acao="abrir-menu"
             aria-haspopup="true"
             aria-expanded="false"
-            aria-label="Ações para ${escaparHtml(cliente.nome)}"
+            aria-label="Ações para ${escaparHtml(corretor.nome)}"
           >⋯</button>
           <div class="row-actions__menu" hidden>
-            <button type="button" data-acao="editar" data-id-cliente="${cliente.id_cliente}">Editar</button>
-            <button type="button" data-acao="excluir" data-id-cliente="${cliente.id_cliente}">Excluir</button>
+            <button type="button" data-acao="editar" data-id-corretor="${corretor.id_corretor}">
+                Editar
+            </button>
+
+            <button type="button" data-acao="excluir" data-id-corretor="${corretor.id_corretor}">
+                Excluir
+            </button>
           </div>
         </td>
       </tr>
@@ -221,14 +226,14 @@ corpoTabela.addEventListener("click", (evento) => {
     fecharMenuAcoes();
 
     if (acao === "editar") {
-        const idCliente = botao.dataset.idCliente;
-        window.location.href = `${ROTA_EDITAR_CLIENTE}?id=${idCliente}`;
+        const idCorretor = botao.dataset.idCorretor;
+        window.location.href = `${ROTA_EDITAR_CORRETOR}?id=${idCorretor}`;
         return;
     }
 
     if (acao === "excluir") {
-        const id_cliente = botao.dataset.idCliente;
-        window.location.href = `${ROTA_EXCLUIR_CLIENTE}?id=${id_cliente}`;
+        const idCorretor = botao.dataset.idCorretor;
+        window.location.href = `${ROTA_EXCLUIR_CORRETOR}?id=${idCorretor}`;
     }
 });
 
@@ -268,7 +273,7 @@ botoesMenu.forEach((botao) => {
         }
 
         if (secao === "corretores") {
-            window.location.href = "../acoes-cliente/index.html";
+            window.location.href = "../acoes-corretor/index.html";
             return;
         }
 
@@ -278,7 +283,7 @@ botoesMenu.forEach((botao) => {
     });
 });
 
-carregarcorretores()
+carregarCorretores()
     .then((lista) => {
         corretores = lista;
         renderizarTabela();

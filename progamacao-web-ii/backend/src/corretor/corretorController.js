@@ -110,4 +110,53 @@ async function cadastrarCorretor(req, res) {
     }
 }
 
-export { cadastrarCorretor };
+/**
+ * @author Pedro Lucas Dos Santos Xavier & Matheus Pereira Rodrigues
+ *
+ * Pesquisa e lista corretores cadastrados no sistema:
+ * - Se nenhum parâmetro for informado na Query String: Retorna a lista completa de todos os corretores.
+ * - Se informados nome, CPF/CNPJ e/ou CRECI: Aplica filtros dinâmicos de busca por texto parcial.
+ * - Retorna os dados ordenados do mais recente para o mais antigo.
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera parâmetros opcionais em `req.query`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna a lista de corretores encontrados em formato JSON com status HTTP 200.
+ */
+async function pesquisarCorretor(req, res) {
+  try {
+    const { nome, cpf_cnpj, creci_corretor } = req.query;
+    const where = {};
+
+
+    if (nome && nome.trim() !== "") {
+      where.nome = {
+        contains: nome.trim(),
+      };
+    }
+    if (cpf_cnpj && cpf_cnpj.trim() !== "") {
+      where.cpf_cnpj = {
+        contains: cpf_cnpj.trim(),
+      };
+    }
+    if (creci_corretor && creci_corretor.trim() !== "") {
+      where.creci_corretor = {
+        contains: creci_corretor.trim(),
+      };
+    }
+    const corretores = await prisma.corretor.findMany({
+      where,
+      orderBy: {
+        id_corretor: "desc",
+      },
+    });
+    return res.status(200).json(corretores);
+  } catch (erro) {
+    console.error("Erro ao pesquisar corretores:", erro);
+    return res.status(500).json({
+      erro: "Erro interno ao buscar corretores",
+      detalhes: erro.message,
+    });
+  }
+}
+
+export { cadastrarCorretor, pesquisarCorretor };
