@@ -8,21 +8,19 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="brand">
-    <span>S.C.A.C.I.</span>
-  </header>
+  <header class="brand" aria-label="S.C.A.C.I."><span>S.C.A.</span><span>C.I.</span></header>
 
   <aside class="sidebar">
-    <div class="menu-title">MENU</div>
+    <div class="menu-title">Menu</div>
     <nav>
-      <button type="button">Início</button>
-      <button type="button">Clientes</button>
-      <button type="button">Compradores</button>
-      <button type="button">Imóveis</button>
-      <button type="button">Vendas</button>
-      <button type="button">Agenda de Visita</button>
-      <button type="button">Funcionários</button>
-      <button type="button" class="active">Corretores</button>
+      <button type="button" data-section="Início">Início</button>
+      <button type="button" data-section="Clientes">Clientes</button>
+      <button type="button" data-section="Compradores">Compradores</button>
+      <button type="button" data-section="Imóveis">Imóveis</button>
+      <button type="button" data-section="Vendas">Vendas</button>
+      <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
+      <button type="button" data-section="Funcionários">Funcionários</button>
+      <button type="button" data-section="Corretores" class="active">Corretores</button>
     </nav>
   </aside>
 
@@ -121,6 +119,13 @@
       </form>
     </div>
   </main>
+
+  <dialog id="navigation-dialog">
+    <p id="navigation-message"></p>
+    <form method="dialog">
+      <button>OK</button>
+    </form>
+  </dialog>
 
   <script src="app.js"></script>
 </body>

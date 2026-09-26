@@ -7,7 +7,6 @@ const fileError = document.querySelector('#file-error');
 let selectedFile = null;
 let dirty = false;
 
-
 const digits = value => value.replace(/\D/g, '');
 
 // Preenche opções de UF
@@ -19,7 +18,7 @@ for (const state of states) stateSelect.add(new Option(state, state));
 form.elements.document.addEventListener('input', event => {
   const value = digits(event.target.value).slice(0, 14);
   event.target.value = value.length <= 11
-    ? value.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/(\.\d{3})(\d)/, '$1-$2')     : value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})$/, '$1.$2.$3/$4-$5');
+    ? value.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/(\.\d{3})(\d)/, '$1-$2')      : value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})$/, '$1.$2.$3/$4-$5');
 });
 
 // Máscara CEP
@@ -217,9 +216,8 @@ form.addEventListener('submit', async event => {
     if (!valid) temErro = true;
   }
 
-  // Se alguma validação personalizada falhou ou o formulário nativo é inválido, interrompe
   if (temErro || !form.checkValidity()) {
-    form.reportValidity(); // Mostra o balão do erro nativo se houver algum campo obrigatório não preenchido
+    form.reportValidity();
     return;
   }
 
@@ -227,7 +225,7 @@ form.addEventListener('submit', async event => {
   button.disabled = true;
   status.textContent = 'Salvando cadastro...';
 
-   try {
+  try {
     const dadosCliente = {
       nome: form.elements.name.value,
       cpf_cnpj: digits(form.elements.document.value),
@@ -242,22 +240,20 @@ form.addEventListener('submit', async event => {
       uf: form.elements.state.value,
       cep: digits(form.elements.postalCode.value),
       estado_civil: form.elements.maritalStatus.value
-     
     };
 
     let casado = false;
     if (dadosCliente.estado_civil === "casado") {
-      // Dados do cônjuge 
       casado = true;
-     
+
       dadosCliente.conjuge_cpf = digits(form.elements.spouseDocument.value);
       dadosCliente.conjuge_nome = form.elements.spouseName.value;
       dadosCliente.regime_bens = form.elements.propertyRegime.value;
       dadosCliente.conjuge_data_nascimento = form.elements.spouseBirthDate.value.trim() || null;
       dadosCliente.data_casamento = form.elements.weddingDate.value;
       dadosCliente.casamento_ativo = form.elements.activeMarriage.value;
-      dadosCliente.data_fim_casamento = null
-    };
+      dadosCliente.data_fim_casamento = null;
+    }
 
     const formData = new FormData();
 
@@ -270,8 +266,7 @@ form.addEventListener('submit', async event => {
     if (casado) {
       formData.append('comprovante_uniao', form.elements.unionProof.files[0]);
     }
-    
-   
+
     const resposta = await fetch('http://localhost:3000/cliente', {
       method: 'POST',
       body: formData
@@ -298,23 +293,26 @@ form.addEventListener('submit', async event => {
 
 // Navegação do menu
 document.querySelectorAll('[data-section]').forEach(button => {
-    button.addEventListener('click', () => {
+  button.addEventListener('click', () => {
 
-        const secao = button.dataset.section;
+    const secao = button.dataset.section;
 
-        if (secao === 'Início') {
-            window.location.href = '../../tela-inicial/index.html';
-            return;
-        }
+    if (secao === 'Início') {
+      window.location.href = '../../tela-inicial/index.html';
+      return;
+    }
 
-        if (secao === 'Clientes') {
-            window.location.href = '../acoes-cliente/index.html';
-            return;
-        }
+    if (secao === 'Clientes') {
+      window.location.href = '../acoes-cliente/index.html';
+      return;
+    }
 
-        document.querySelector('#navigation-message').textContent =
-            `A seção “${secao}” ainda não está disponível.`;
+    const navMessage = document.querySelector('#navigation-message');
+    const navDialog = document.querySelector('#navigation-dialog');
 
-        document.querySelector('#navigation-dialog').showModal();
-    });
+    if (navMessage && navDialog) {
+      navMessage.textContent = `A seção “${secao}” ainda não está disponível.`;
+      navDialog.showModal();
+    }
+  });
 });
