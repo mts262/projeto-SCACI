@@ -1,32 +1,5 @@
-const DB_NAME = 'SCACIDB';
-const DB_VERSION = 1;
-const STORE_NAME = 'brokers';
-
-let db = null;
-
 // Helper para manter apenas dígitos
 const digits = (str) => (str || '').replace(/\D/g, '');
-
-// Inicialização do IndexedDB
-function initDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (e) => {
-      const database = e.target.result;
-      if (!database.objectStoreNames.contains(STORE_NAME)) {
-        database.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-
-    request.onsuccess = (e) => {
-      db = e.target.result;
-      resolve(db);
-    };
-
-    request.onerror = (e) => reject(e.target.error);
-  });
-}
 
 // Preenchimento de UFs
 const ufs = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
@@ -62,56 +35,64 @@ const form = document.getElementById('broker-form');
 const saveStatus = document.getElementById('save-status');
 
 form.addEventListener('submit', async (e) => {
-  e.preventDefault();
 
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
-  }
+    e.preventDefault();
 
-  const formData = new FormData(form);
-
-  try {
-    // 1. Tenta enviar para a API REST
-    const resposta = await fetch('http://localhost:3000/corretor', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!resposta.ok) {
-      throw new Error('Servidor indisponível, salvando localmente...');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
     }
 
-    saveStatus.textContent = 'Corretor cadastrado com sucesso!';
-    form.reset();
-  } catch (err) {
-    console.warn(err.message);
-
-    // 2. Fallback local via IndexedDB caso o servidor não responda
     try {
-      if (!db) await initDB();
 
-      const brokerData = Object.fromEntries(formData.entries());
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      const store = tx.objectStore(STORE_NAME);
-      store.add(brokerData);
+        const dadosCorretor = {
+            tipo: form.elements.brokerType.value,
+            creci_corretor: form.elements.creci.value,
+            nome: form.elements.name.value,
+            cpf_cnpj: digits(form.elements.document.value),
+            data_nascimento: form.elements.birthDate.value.trim() || null,
+            telefone: form.elements.phone.value,
+            email: form.elements.email.value,
+            logradouro: form.elements.street.value.trim() || null,
+            numero: form.elements.number.value.trim() || null,
+            bairro: form.elements.neighborhood.value.trim() || null,
+            complemento: form.elements.complement.value.trim() || null,
+            cidade: form.elements.city.value.trim() || null,
+            uf: form.elements.state.value.trim() || null,
+            cep: digits(form.elements.postalCode.value) || null
+        };
 
-      tx.oncomplete = () => {
-        saveStatus.textContent = 'Corretor cadastrado com sucesso (Local)!';
+        const resposta = await fetch('http://localhost:3000/corretor', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosCorretor)
+        });
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                resultado.erro ||
+                resultado.detalhes ||
+                'Erro ao cadastrar corretor.'
+            );
+        }
+
+        saveStatus.textContent = 'Corretor cadastrado com sucesso!';
         form.reset();
-      };
 
-      tx.onerror = () => {
-        saveStatus.textContent = 'Erro ao salvar no banco de dados.';
-      };
-    } catch (dbErr) {
-      console.error(dbErr);
-      saveStatus.textContent = 'Erro inesperado ao salvar.';
+    } catch (error) {
+
+        console.error('Erro na requisição:', error);
+
+        saveStatus.textContent = error.message;
+
+    } finally {
+
+        setTimeout(() => {
+            saveStatus.textContent = '';
+        }, 4000);
     }
-  } finally {
-    setTimeout(() => { saveStatus.textContent = ''; }, 4000);
-  }
 });
-
-// Inicialização da base de dados
-initDB();

@@ -1,6 +1,7 @@
 import express from "express";
 import prisma from "./database.js";
 import clienteRoutes from "./cliente/clienteRoutes.js";
+import corretorRoutes from "./corretor/corretorRoutes.js";
 import cors from "cors";
 
 const app = express();
@@ -12,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 app.use(clienteRoutes);
 app.use("/uploads", express.static("uploads"));
-
+app.use(corretorRoutes);
 
 app.listen(3000, async () => {
     console.log("Servidor rodando na porta 3000");
