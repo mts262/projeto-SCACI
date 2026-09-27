@@ -2,7 +2,7 @@ import express from "express";
 import {
   cadastrarCorretor,
   // editarCorretor,
-  // excluirCorretor,
+  excluirCorretor,
   pesquisarCorretor,
   // buscarCorretorPorId
 } from "./corretorController.js";
@@ -21,9 +21,10 @@ router.get("/corretor/:id_corretor", buscarCorretorPorId);
 
 // Editar corretor por ID
 router.put("/corretor/:id_corretor", editarCorretor);
+*/
 
 // Excluir corretor por ID
 router.delete("/corretor/:id_corretor", excluirCorretor);
-*/
+
 
 export default router;

@@ -159,4 +159,49 @@ async function pesquisarCorretor(req, res) {
   }
 }
 
-export { cadastrarCorretor, pesquisarCorretor };
+/**
+ * @author Matheus Pereira Rodrigues
+ *
+ * Exclui um corretor do banco de dados pelo seu ID.
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id_corretor` ou `req.params.id`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna mensagem de sucesso ou mensagem de erro.
+ */
+async function excluirCorretor(req, res) {
+    const id = Number(req.params.id_corretor || req.params.id);
+
+    if (isNaN(id)) {
+        return res.status(400).json({ erro: "O ID fornecido deve ser um número válido." });
+    }
+
+    try {
+        const corretor = await prisma.corretor.findUnique({
+            where: {
+                id_corretor: id
+            }
+        });
+
+        if (!corretor) {
+            return res.status(404).json({erro: "Corretor não encontrado!"});
+        }
+
+        await prisma.corretor.delete({
+            where: {
+                id_corretor: id
+            }
+        });
+
+        return res.status(200).json({ mensagem: 'Corretor excluído com sucesso!' });
+
+    } catch (error) {
+        console.error("Erro ao excluir corretor:", error);
+
+    return res.status(500).json({
+        erro: "Erro ao excluir o corretor!",
+        detalhes: error.message
+    });
+    }
+}
+
+export { cadastrarCorretor, pesquisarCorretor, excluirCorretor };
