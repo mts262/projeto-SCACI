@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1c1c1b">
+  <title>Editar Corretor | S.C.A.C.I.</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Ir para o formulário</a>
+  <header class="brand" aria-label="S.C.A.C.I."><span>S.C.A.</span><span>C.I.</span></header>
+
+  <aside class="sidebar" aria-label="Menu principal">
+    <p class="menu-title">Menu</p>
+    <nav>
+      <button type="button" data-section="Início">Início</button>
+      <button type="button" aria-current="page" data-section="Clientes">Clientes</button>
+      <button type="button" data-section="Compradores">Compradores</button>
+      <button type="button" data-section="Imóveis">Imóveis</button>
+      <button type="button" data-section="Vendas">Vendas</button>
+      <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
+      <button type="button" data-section="Funcionários">Funcionários</button>
+      <button type="button" data-section="Corretores">Corretores</button>
+    </nav>
+  </aside>
+
+  <main id="conteudo" tabindex="-1">
+    <nav class="breadcrumb" aria-label="Localização">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v11h-6v-7H9v7H3Z"/></svg>
+      <span class="chevron" aria-hidden="true">‹</span>
+      <ol>
+        <li>Início</li>
+        <li>Corretores</li>
+        <li aria-current="page">Editar</li>
+      </ol>
+    </nav>
+
+    <section class="content" aria-labelledby="page-title">
+      <h1 id="page-title">Editar <span>Corretor</span></h1>
+
+      <form id="corretor-form">
+        <div class="personal-fields">
+          <div class="field">
+            <label for="type">Tipo</label>
+            <select id="type" name="type" required>
+              <option value="">Selecione</option>
+              <option value="interno">Interno</option>
+              <option value="externo">Externo</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="creci">CRECI</label>
+            <input id="creci" name="creci" maxlength="15" required>
+          </div>
+
+          <div class="field">
+            <label for="name">Nome Completo</label>
+            <input id="name" name="name" autocomplete="name" required maxlength="100">
+          </div>
+
+          <div class="field">
+            <label for="document">CPF ou CNPJ</label>
+            <input id="document" name="document" inputmode="numeric" required maxlength="18" aria-describedby="document-error">
+            <span class="error" id="document-error"></span>
+          </div>
+
+          <div class="field">
+            <label for="birthDate">Data de Nascimento</label>
+            <input type="date" id="birthDate" name="birthDate" autocomplete="bday" required>
+          </div>
+
+          <div class="field">
+            <label for="phone">Telefone</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel-national" required maxlength="16">
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email" required maxlength="100">
+          </div>
+        </div>
+
+        <div class="additional-fields">
+          <div class="field postal-field">
+            <label for="postalCode">CEP</label>
+            <input id="postalCode" name="postalCode" autocomplete="postal-code" inputmode="numeric" required maxlength="9" aria-describedby="postal-error">
+            <span class="error" id="postal-error"></span>
+          </div>
+
+          <div class="field">
+            <label for="street">Logradouro</label>
+            <input id="street" name="street" autocomplete="address-line1" required maxlength="100">
+          </div>
+
+          <div class="address-row">
+            <div class="field">
+              <label for="number">Nº</label>
+              <input id="number" name="number" required maxlength="10">
+            </div>
+            <div class="field">
+              <label for="complement">Complemento</label>
+              <input id="complement" name="complement" maxlength="100" placeholder="Apartamento, bloco, casa">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="neighborhood">Bairro</label>
+            <input id="neighborhood" name="neighborhood" required maxlength="100">
+          </div>
+
+          <div class="city-row">
+            <div class="field">
+              <label for="city">Cidade</label>
+              <input id="city" name="city" autocomplete="address-level2" required maxlength="100">
+            </div>
+            <div class="field">
+              <label for="state">UF</label>
+              <select id="state" name="state" autocomplete="address-level1" required aria-label="UF"></select>
+            </div>
+          </div>
+
+          <div class="save-area">
+            <p id="save-status" role="status" aria-live="polite"></p>
+            <button class="save-button" type="submit">Salvar edição</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <dialog id="navigation-dialog" aria-labelledby="dialog-title">
+    <h2 id="dialog-title">Módulo em desenvolvimento</h2>
+    <p id="navigation-message"></p>
+    <form method="dialog">
+      <button class="save-button">Voltar à edição</button>
+    </form>
+  </dialog>
+</body>
+</html>
