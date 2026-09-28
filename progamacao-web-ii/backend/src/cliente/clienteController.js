@@ -523,41 +523,62 @@ async function excluirCliente(req, res) {
 
 /**
  * @author Pedro Lucas Dos Santos Xavier
- *
- * Pesquisa e lista clientes cadastrados no sistema:
- * - Se nenhum parâmetro for informado na Query String: Retorna a lista completa de todos os clientes.
- * - Se informados nome e/ou CPF/CNPJ: Aplica filtros dinâmicos de busca por texto parcial.
- * - Retorna os dados ordenados do mais recente para o mais antigo, incluindo o histórico/dados do cônjuge.
- *
- * @param {Object} req - Objeto de requisição do Express (espera parâmetros opcionais em `req.query`).
- * @param {Object} res - Objeto de resposta do Express.
- * @returns {Promise<Object>} Retorna a lista de clientes encontrados em formato JSON com status HTTP 200.
  */
 async function pesquisarCliente(req, res) {
   try {
-    const { nome, cpf_cnpj } = req.query;
+    const { nome, cpf_cnpj, estado_civil, cidade, estado } = req.query;
     const where = {};
-
 
     if (nome && nome.trim() !== "") {
       where.nome = {
         contains: nome.trim(),
+        mode: "insensitive", // Busca case-insensitive no PostgreSQL/Prisma
       };
     }
+
     if (cpf_cnpj && cpf_cnpj.trim() !== "") {
       where.cpf_cnpj = {
         contains: cpf_cnpj.trim(),
       };
     }
+
+    if (estado_civil && estado_civil.trim() !== "") {
+      where.estado_civil = estado_civil.trim();
+    }
+
+    // Se cidade/estado estiverem diretamente no model cliente:
+    if (cidade && cidade.trim() !== "") {
+      where.cidade = {
+        contains: cidade.trim(),
+        mode: "insensitive",
+      };
+    }
+
+    if (estado && estado.trim() !== "") {
+      where.estado = estado.trim();
+    }
+
+    /* 
+    Nota: Se Cidade/UF estiverem em uma tabela relacionada 'endereco', a sintaxe seria:
+    if (cidade || estado) {
+      where.endereco = {
+        ...(cidade && { cidade: { contains: cidade.trim(), mode: 'insensitive' } }),
+        ...(estado && { estado: estado.trim() })
+      };
+    }
+    */
+
     const clientes = await prisma.cliente.findMany({
       where,
       include: {
         conjuge: true,
+        // endereco: true, // Descomente caso o endereço venha de outra tabela
       },
       orderBy: {
         id_cliente: "desc",
       },
     });
+
     return res.status(200).json(clientes);
   } catch (erro) {
     console.error("Erro ao pesquisar clientes:", erro);
@@ -567,6 +588,5 @@ async function pesquisarCliente(req, res) {
     });
   }
 }
-
 
 export { cadastrarCliente, buscarClientePorId, editarCliente, excluirCliente, pesquisarCliente };
