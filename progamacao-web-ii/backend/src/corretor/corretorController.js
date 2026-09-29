@@ -203,5 +203,112 @@ async function excluirCorretor(req, res) {
     });
     }
 }
+/**
+ * @author Pedro Lucas Dos Santos Xavier
+ *
+ * Busca um único corretor pelo seu ID.
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id` ou `req.params.id_corretor`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna os dados do corretor encontrado ou um erro 404/400.
+ */
+async function buscarCorretorPorID(req, res) {
+  
+    const id = Number(req.params.id || req.params.id_corretor);
 
-export { cadastrarCorretor, pesquisarCorretor, excluirCorretor };
+    if (isNaN(id)) {
+        return res.status(400).json({ erro: "O ID fornecido deve ser um número válido." });
+    }
+
+    try {
+        const corretor = await prisma.corretor.findUnique({
+            where: {
+                id_corretor: id 
+            }
+        });
+        
+        if (!corretor) {
+            return res.status(404).json({ erro: "Corretor não encontrado!" });
+        }
+
+        return res.status(200).json(corretor);
+    } catch (error) {
+        console.error("Erro ao buscar corretor por ID:", error);
+        return res.status(500).json({
+            erro: "Erro interno ao buscar o corretor",
+            detalhes: error.message
+        });
+    }
+}
+/**
+ * @author Pedro Lucas Dos Santos Xavier
+ *
+ * Edita os dados de corretor no banco de dados
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id` ou `req.params.id_corretor`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna os dados do corretor atualizado ou um erro 404/400.
+ */
+async function editarCorretor(req, res) {
+    const id = Number(req.params.id || req.params.id_corretor);
+    const dados = req.body;
+
+    if (isNaN(id)) {
+        return res.status(400).json({ mensagem: "O ID fornecido deve ser um número válido." });
+    }
+
+    const camposFaltando = verificarDadosCorretor(dados);
+    if (camposFaltando.length > 0) {
+        return res.status(400).json({ 
+            mensagem: "Preencha todos os campos obrigatórios.", 
+            camposFaltando 
+        });
+    }
+
+    try {
+        // Verifica diretamente no banco se o corretor existe antes de atualizar
+        const corretorExistente = await prisma.corretor.findUnique({
+            where: { id_corretor: id }
+        });
+
+        if (!corretorExistente) {
+            return res.status(404).json({ mensagem: "Corretor não cadastrado" });
+        }
+        
+        // Tratamento seguro para a data de nascimento opcional
+        let dataNascimentoFormatada = null;
+        if (dados.data_nascimento && dados.data_nascimento.trim() !== "") {
+            dataNascimentoFormatada = new Date(`${dados.data_nascimento}T00:00:00.000Z`);
+        }
+
+        const dadosAtualizados = {
+            tipo: dados.tipo,
+            creci_corretor: dados.creci_corretor,
+            nome: dados.nome,
+            cpf_cnpj: dados.cpf_cnpj,
+            data_nascimento: dataNascimentoFormatada,
+            telefone: dados.telefone,
+            email: dados.email,
+            cep: dados.cep || null,
+            logradouro: dados.logradouro || null,
+            numero: dados.numero || null,
+            complemento: dados.complemento || null,
+            bairro: dados.bairro || null,
+            cidade: dados.cidade || null,
+            uf: dados.uf || null
+        };
+
+        const corretorAtualizado = await prisma.corretor.update({
+            where: { id_corretor: id }, 
+            data: dadosAtualizados      
+        });
+
+        return res.status(200).json(corretorAtualizado);
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ mensagem: "Erro interno ao atualizar o corretor." });
+    }
+}
+
+export { cadastrarCorretor, pesquisarCorretor, excluirCorretor, editarCorretor, buscarCorretorPorID };

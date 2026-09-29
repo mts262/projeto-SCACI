@@ -1,10 +1,10 @@
 import express from "express";
 import {
   cadastrarCorretor,
-  // editarCorretor,
+  editarCorretor,
   excluirCorretor,
   pesquisarCorretor,
-  // buscarCorretorPorId
+  buscarCorretorPorID
 } from "./corretorController.js";
 
 const router = express.Router();
@@ -15,13 +15,13 @@ router.post("/corretor", cadastrarCorretor);
 // Listar / Pesquisar todos os corretores
 router.get("/corretores", pesquisarCorretor);
 
-/*
+
 // Buscar um corretor por ID
-router.get("/corretor/:id_corretor", buscarCorretorPorId);
+router.get("/corretor/:id_corretor", buscarCorretorPorID);
 
 // Editar corretor por ID
 router.put("/corretor/:id_corretor", editarCorretor);
-*/
+
 
 // Excluir corretor por ID
 router.delete("/corretor/:id_corretor", excluirCorretor);
