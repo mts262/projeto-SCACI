@@ -1,26 +1,9 @@
-// Protótipo: dados mockados, sem integração com o backend
-const corretorMock = {
-    id_corretor: 1,
-    tipo: "externo",
-    creci_corretor: "CRECI67891",
-    nome: "Pedro Lucas Dos Santos Xavier",
-    cpf_cnpj: "91888340580",
-    data_nascimento: "2005-06-27",
-    telefone: "77988488072",
-    email: "Pedrin007@gmail.com",
-    cep: "45000000",
-    complemento: "Casa",
-    logradouro: "Avenida Brasil",
-    numero: "2288",
-    bairro: "Recreio",
-    cidade: "Vitória da Conquista",
-    uf: "BA"
-};
-
 const modal = document.querySelector('#modal-exclusao');
 const modalSucesso = document.querySelector('#modal-sucesso');
 const deleteButton = document.querySelector('#btn-excluir');
 const confirmButton = document.querySelector('#btn-confirmar');
+const parametros = new URLSearchParams(window.location.search);
+const id_corretor = parametros.get("id");
 
 function apenasDigitos(valor = "") {
     return String(valor).replace(/\D/g, "");
@@ -81,24 +64,38 @@ function formatarTipo(tipo = "") {
     return tipo.charAt(0).toUpperCase() + tipo.slice(1);
 }
 
-function preencherCampos(corretor) {
-    document.querySelector("#name").value = corretor.nome ?? "";
-    document.querySelector("#document").value = formatarDocumento(corretor.cpf_cnpj ?? "");
-    document.querySelector("#creci").value = corretor.creci_corretor ?? "";
-    document.querySelector("#birthDate").value = formatarData(corretor.data_nascimento);
-    document.querySelector("#phone").value = formatarTelefone(corretor.telefone ?? "");
-    document.querySelector("#email").value = corretor.email ?? "";
-    document.querySelector("#postalCode").value = formatarCep(corretor.cep ?? "");
-    document.querySelector("#complement").value = corretor.complemento ?? "";
-    document.querySelector("#street").value = corretor.logradouro ?? "";
-    document.querySelector("#number").value = corretor.numero ?? "";
-    document.querySelector("#neighborhood").value = corretor.bairro ?? "";
-    document.querySelector("#city").value = corretor.cidade ?? "";
-    document.querySelector("#state").value = corretor.uf ?? "";
-    document.querySelector("#type").value = formatarTipo(corretor.tipo);
+async function carregarCorretor() {
+    try {
+        const resposta = await fetch(`http://localhost:3000/corretor/${id_corretor}`);
+
+        const corretor = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(corretor.erro || corretor.mensagem || "Erro ao carregar corretor.");
+        }
+
+        document.querySelector("#name").value = corretor.nome;
+        document.querySelector("#document").value = formatarDocumento(corretor.cpf_cnpj);
+        document.querySelector("#creci").value = corretor.creci_corretor;
+        document.querySelector("#birthDate").value = formatarData(corretor.data_nascimento || "");
+        document.querySelector("#phone").value = formatarTelefone(corretor.telefone ?? "");
+        document.querySelector("#email").value = corretor.email;
+        document.querySelector("#postalCode").value = formatarCep(corretor.cep || "");
+        document.querySelector("#complement").value = corretor.complemento || "";
+        document.querySelector("#street").value = corretor.logradouro || "";
+        document.querySelector("#number").value = corretor.numero || "";
+        document.querySelector("#neighborhood").value = corretor.bairro || "";
+        document.querySelector("#city").value = corretor.cidade || "";
+        document.querySelector("#state").value = corretor.uf || "";
+        document.querySelector("#type").value = formatarTipo(corretor.tipo);
+
+    } catch (error) {
+        console.error(error);
+        status.textContent = error.message;
+    }
 }
 
-preencherCampos(corretorMock);
+carregarCorretor();
 
 // Abre o modal de confirmação
 deleteButton.addEventListener('click', () => modal.showModal());
@@ -113,19 +110,39 @@ document.querySelector('#btn-nao').addEventListener('click', () => modal.close()
     });
 });
 
-// Exclusão simulada do corretor
-confirmButton.addEventListener('click', () => {
-    console.log(`Exclusão simulada do corretor ${corretorMock.id_corretor}.`);
+// Exclusão do corretor
+confirmButton.addEventListener('click', async () => {
+  confirmButton.disabled = true;
 
+  try {
+    const resposta = await fetch(`http://localhost:3000/corretor/${id_corretor}`, {
+      method: 'DELETE'
+    });
+
+    const resultado = await resposta.json();
+    console.log('Resposta do Backend:', JSON.stringify(resultado, null, 2));
+
+    if (!resposta.ok) {
+      throw new Error(resultado.erro || 'Erro ao excluir corretor!');
+    }
+    
     modal.close();
     modalSucesso.showModal();
+  } catch (error) {
+    console.log(error);
 
-    // Permanece na tela, mas impede uma nova exclusão
-    deleteButton.disabled = true;
+    modal.close();
+    status.textContent = error.message;
+  } finally {
+    confirmButton.disabled = false;
+  }
 });
 
 // Fecha o modal de sucesso
-document.querySelector('#btn-ok').addEventListener('click', () => modalSucesso.close());
+document.querySelector('#btn-ok').addEventListener('click', () => {
+    modalSucesso.close();
+    window.location.href = "../listagem-corretor/index.html";
+});
 
 // Navegação do menu
 document.querySelectorAll('[data-section]').forEach(button => {
@@ -143,7 +160,7 @@ document.querySelectorAll('[data-section]').forEach(button => {
         }
 
         if (secao === 'Corretores') {
-            window.location.href = "../listagem-corretor/index.html";
+            window.location.href = "../acoes-corretor/index.html";
             return;
         }
 

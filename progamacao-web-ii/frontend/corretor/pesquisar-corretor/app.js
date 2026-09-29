@@ -256,18 +256,23 @@ ufSelect.addEventListener('change', filteragents);
 
 renderResults(agents);
 
+// Navegação do menu
 document.querySelectorAll('[data-section]').forEach(button => {
     button.addEventListener('click', () => {
-
         const secao = button.dataset.section;
 
         if (secao === 'Início') {
-            window.location.href = '../../tela-inicial/index.html';
+            window.location.href = "../../tela-inicial/index.html";
             return;
         }
 
-        if (secao === 'agentes') {
-            window.location.href = '../acoes-agente/index.html';
+        if (secao === 'Clientes') {
+            window.location.href = "../../cliente/acoes-cliente/index.html";
+            return;
+        }
+
+        if (secao === 'Corretores') {
+            window.location.href = "../acoes-corretor/index.html";
             return;
         }
 
@@ -277,3 +282,4 @@ document.querySelectorAll('[data-section]').forEach(button => {
         document.querySelector('#navigation-dialog').showModal();
     });
 });
+

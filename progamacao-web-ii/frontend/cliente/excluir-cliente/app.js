@@ -1,8 +1,63 @@
 const modal = document.querySelector('#modal-exclusao');
+const modalSucesso = document.querySelector('#modal-sucesso');
 const status = document.querySelector('#status-exclusao');
 const confirmButton = document.querySelector('#btn-confirmar');
 const parametros = new URLSearchParams(window.location.search);
 const id_cliente = parametros.get("id");
+
+function apenasDigitos(valor = "") {
+    return String(valor).replace(/\D/g, "");
+}
+
+function formatarDocumento(valor = "") {
+    const digitos = apenasDigitos(valor);
+
+    if (digitos.length === 11) {
+        return digitos.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    }
+
+    if (digitos.length === 14) {
+        return digitos.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+    }
+
+    return valor;
+}
+
+function formatarTelefone(valor = "") {
+    const digitos = apenasDigitos(valor);
+
+    if (digitos.length === 11) {
+        return digitos.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    }
+
+    if (digitos.length === 10) {
+        return digitos.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    }
+
+    return valor;
+}
+
+function formatarCep(valor = "") {
+    const digitos = apenasDigitos(valor);
+
+    if (digitos.length === 8) {
+        return digitos.replace(/(\d{5})(\d{3})/, "$1-$2");
+    }
+
+    return valor;
+}
+
+// Converte a data ISO (aaaa-mm-dd) para dd/mm/aaaa (usa UTC para não perder um dia por fuso)
+function formatarData(valor) {
+    if (!valor) return "";
+
+    const data = new Date(valor);
+    if (isNaN(data)) return "";
+
+    const dia = String(data.getUTCDate()).padStart(2, "0");
+    const mes = String(data.getUTCMonth() + 1).padStart(2, "0");
+    return `${dia}/${mes}/${data.getUTCFullYear()}`;
+}
 
 async function carregarCliente() {
     try {
@@ -15,11 +70,12 @@ async function carregarCliente() {
         }
 
         document.querySelector("#name").value = cliente.nome;
-        document.querySelector("#document").value = cliente.cpf_cnpj;
-        document.querySelector("#birthDate").value = cliente.data_nascimento;
-        document.querySelector("#phone").value = cliente.telefone;
+        document.querySelector("#document").value = formatarDocumento(cliente.cpf_cnpj);
+        document.querySelector("#birthDate").value = formatarData(cliente.data_nascimento);
+        document.querySelector("#phone").value = formatarTelefone(cliente.telefone);
         document.querySelector("#email").value = cliente.email || "";
-        document.querySelector("#postalCode").value = cliente.cep;
+        document.querySelector("#postalCode").value = formatarCep(cliente.cep);
+        document.querySelector('#complement').value = cliente.complemento;
         document.querySelector("#street").value = cliente.logradouro;
         document.querySelector("#number").value = cliente.numero;
         document.querySelector("#neighborhood").value = cliente.bairro;
@@ -54,8 +110,6 @@ confirmButton.addEventListener('click', async () => {
   confirmButton.disabled = true;
 
   try {
-    // substituir o id_cliente fixo no teste pelo ID do cliente 
-    // que o usuário realmente selecionar na tela de pesquisa/listagem.
     const resposta = await fetch(`http://localhost:3000/cliente/${id_cliente}`, {
       method: 'DELETE'
     });
@@ -68,11 +122,8 @@ confirmButton.addEventListener('click', async () => {
     }
     
     modal.close();
-    status.textContent = "Cliente excluído com sucesso!";
+    modalSucesso.showModal();
 
-    setTimeout(() => {
-      window.location.href = "../listagem-clientes/index.html";
-    }, 1000);
   } catch (error) {
     console.log(error);
 
@@ -81,6 +132,12 @@ confirmButton.addEventListener('click', async () => {
   } finally {
     confirmButton.disabled = false;
   }
+});
+
+// Fecha o modal de sucesso
+document.querySelector('#btn-ok').addEventListener('click', () => {
+    modalSucesso.close();
+    window.location.href = "../listagem-clientes/index.html";
 });
 
 // Navegação do menu

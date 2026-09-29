@@ -96,3 +96,30 @@ form.addEventListener('submit', async (e) => {
         }, 4000);
     }
 });
+
+// Navegação do menu
+document.querySelectorAll('[data-section]').forEach(button => {
+    button.addEventListener('click', () => {
+        const secao = button.dataset.section;
+
+        if (secao === 'Início') {
+            window.location.href = "../../tela-inicial/index.html";
+            return;
+        }
+
+        if (secao === 'Clientes') {
+            window.location.href = "../../cliente/acoes-cliente/index.html";
+            return;
+        }
+
+        if (secao === 'Corretores') {
+            window.location.href = "../acoes-corretor/index.html";
+            return;
+        }
+
+        document.querySelector('#navigation-message').textContent =
+            `A seção “${secao}” ainda não está disponível.`;
+
+        document.querySelector('#navigation-dialog').showModal();
+    });
+});

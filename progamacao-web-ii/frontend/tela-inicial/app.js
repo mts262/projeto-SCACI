@@ -31,6 +31,11 @@ menuButtons.forEach((button) => {
       return;
     }
 
+    if (button.dataset.section === 'Corretores') {
+      window.location.href = "../corretor/acoes-corretor/index.html";
+      return;
+    }
+
     if (secao === 'Início') {
             return;
         }
