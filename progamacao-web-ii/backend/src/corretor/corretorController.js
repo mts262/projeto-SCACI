@@ -204,7 +204,7 @@ async function excluirCorretor(req, res) {
     }
 }
 /**
- * @author Matheus Pereira Rodrigues
+ * @author Pedro Lucas Dos Santos Xavier
  *
  * Busca um único corretor pelo seu ID.
  *
@@ -240,7 +240,15 @@ async function buscarCorretorPorID(req, res) {
         });
     }
 }
-
+/**
+ * @author Pedro Lucas Dos Santos Xavier
+ *
+ * Edita os dados de corretor no banco de dados
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id` ou `req.params.id_corretor`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna os dados do corretor atualizado ou um erro 404/400.
+ */
 async function editarCorretor(req, res) {
     const id = Number(req.params.id || req.params.id_corretor);
     const dados = req.body;
