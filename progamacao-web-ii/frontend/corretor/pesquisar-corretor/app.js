@@ -1,70 +1,3 @@
-const agents = [
-  {
-    name: 'Pedro Lucas dos Santos Xavier',
-    document: '918.883.405-80',
-    CRECI: 'CRECI-BA 12345',
-    email: 'pedrin007@gmail.com',
-    city: 'Vitória da Conquista',
-    state: 'BA',
-  },
-  {
-    name: 'Maria Helena Souza Lima',
-    document: '321.554.778-02',
-    CRECI: 'CRECI-BA 67890',
-    email: 'mhelena@gmail.com',
-    city: 'Barra do Choça',
-    state: 'BA',
-  },
-  {
-    name: 'José Almeida Neto',
-    document: '443.882.710-20',
-    CRECI: 'CRECI-BA 25590',
-    email: 'jose.almeida@gmail.com',
-    city: 'Jequié',
-    state: 'BA',
-  },
-  {
-    name: 'Ana Paula Ribeiro',
-    document: '678.991.540-60',
-    CRECI: 'CRECI-BA 88364',
-    email: 'anapaula.ribeiro@hotmail.com',
-    city: 'Itapetinga',
-    state: 'BA',
-  },
-  {
-    name: 'Carlos Eduardo Azevedo',
-    document: '551.209.440-09',
-    CRECI: 'CRECI-BA 11765',
-    email: 'carlos.eduardo@gmail.com',
-    city: 'Salvador',
-    state: 'BA',
-  },
-  {
-    name: 'Beatriz Maia Santos',
-    document: '065.789.230-40',
-    CRECI: 'CRECI-SE 03887',
-    email: 'beatriz.maia@outlook.com',
-    city: 'Aracaju',
-    state: 'SE',
-  },
-  {
-    name: 'Rafael Souza Costa',
-    document: '837.221.760-12',
-    CRECI: 'CRECI-BA 73649',
-    email: 'rafael.souza@gmail.com',
-    city: 'Ilhéus',
-    state: 'BA',
-  },
-  {
-    name: 'Larissa Mendes Ferreira',
-    document: '772.309.890-21',
-    CRECI: 'CRECI-PE 34839',
-    email: 'larissa.ferreira@gmail.com',
-    city: 'Recife',
-    state: 'PE',
-  }
-];
-
 const form = document.querySelector('#search-form');
 const resultsBody = document.querySelector('#results-body');
 const resultsSummary = document.querySelector('#results-summary');
@@ -74,78 +7,82 @@ const ufSelect = document.querySelector('#uf');
 const clearButton = document.querySelector('#clear-filter');
 const feedback = document.querySelector('#search-feedback');
 
-function normalize(value = '') {
-  return String(value).trim().toLowerCase();
-}
+// URL base da sua API no back-end (ajuste a porta se necessário)
+const API_URL = 'http://localhost:3000/corretores';
 
-function cleanDigits(value = '') {
-  return String(value).replace(/\D/g, '');
-}
+let totalAgentsCount = 0;
 
 function setFeedback(message = '') {
   feedback.textContent = message;
 }
 
-function filteragents() {
-  const query = normalize(searchInput.value);
-  const cityValue = normalize(cityInput.value);
-  const ufValue = ufSelect.value;
+// Função assíncrona que faz o GET no back-end enviando os parâmetros de busca
+async function fetchAgents(params = {}) {
+  try {
+    const queryString = new URLSearchParams(params).toString();
+    const response = await fetch(`${API_URL}?${queryString}`);
+    
+    if (!response.ok) {
+      throw new Error('Erro ao buscar dados no servidor.');
+    }
 
-  const queryDigits = cleanDigits(query);
-
-  const filtered = agents.filter(agent => {
-    const documentDigits = cleanDigits(agent.document);
-    const CRECIDigits = cleanDigits(agent.CRECI);
-    const matchesQuery = !query || [
-      agent.name,
-      documentDigits,
-      CRECIDigits,
-      agent.email,
-      agent.city
-    ].some(value => normalize(value).includes(query) || normalize(value).includes(queryDigits));
-
-    const matchesCity = !cityValue || normalize(agent.city).includes(cityValue);
-    const matchesUf = !ufValue || agent.state === ufValue;
-
-    return matchesQuery && matchesCity && matchesUf;
-  });
-
-  renderResults(filtered);
+    const data = await response.json();
+    return data; // Retorna o array de corretores vindo do back-end
+  } catch (error) {
+    console.error('Erro na requisição:', error);
+    setFeedback('Erro ao conectar com o servidor.');
+    return [];
+  }
 }
 
-function renderResults(filtered) {
-  resultsSummary.textContent = `Exibindo ${filtered.length} de ${agents.length} agentes`;
+async function filterAgents() {
+  const query = searchInput.value.trim();
+  const city = cityInput.value.trim();
+  const uf = ufSelect.value;
+
+  const queryParams = {};
+  if (query) queryParams.nome = query;
+  if (city) queryParams.cidade = city;
+  if (uf) queryParams.uf = uf;
+
+  const corretores = await fetchAgents(queryParams);
+  totalAgentsCount = corretores.length;
+  renderResults(corretores, totalAgentsCount);
+}
+
+function renderResults(filtered, total = totalAgentsCount) {
+  resultsSummary.textContent = `Exibindo ${filtered.length} de ${total} agentes`;
 
   if (!filtered.length) {
-    setFeedback('agente não encontrado!');
+    setFeedback('Agente não encontrado!');
     resultsBody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum agente encontrado para os filtros informados.</td></tr>';
     return;
   }
 
   setFeedback('');
-  const rows = filtered.slice(0, 5).map(agent => `
+  const rows = filtered.map(agent => `
   <tr>
-    <td>${agent.name}</td>
-    <td>${agent.document}</td>
-    <td>${agent.CRECI}</td>
+    <td>${agent.nome}</td>
+    <td>${agent.cpf_cnpj}</td>
+    <td>${agent.creci_corretor}</td>
     <td>${agent.email}</td>
 
     <td class="row-actions">
       <button
         type="button"
         class="row-actions__button"
-        aria-label="Ações de ${agent.name}"
+        aria-label="Ações de ${agent.nome}"
         aria-expanded="false"
       >
         …
       </button>
 
       <div class="row-actions__menu" hidden>
-        <button type="button" data-acao="editar" data-id="${agent.id_agente}">
+        <button type="button" data-acao="editar" data-id="${agent.id_corretor}">
           Editar
         </button>
 
-        <button type="button" data-acao="excluir" data-id="${agent.id_agente}">
+        <button type="button" data-acao="excluir" data-id="${agent.id_corretor}">
           Excluir
         </button>
       </div>
@@ -156,91 +93,81 @@ function renderResults(filtered) {
   resultsBody.innerHTML = rows;
 }
 
+// Eventos de clique na tabela (ações de editar/excluir)
 resultsBody.addEventListener('click', event => {
-
   const botao = event.target.closest('.row-actions__button');
 
   if (botao) {
-
     document.querySelectorAll('.row-actions__menu').forEach(menu => {
       menu.hidden = true;
     });
-
     document.querySelectorAll('.row-actions__button').forEach(button => {
       button.setAttribute('aria-expanded', 'false');
     });
 
     const menu = botao.nextElementSibling;
-    const rect = botao.getBoundingagentRect();
+    const rect = botao.getBoundingClientRect();
 
     menu.style.top = `${rect.bottom + 6}px`;
     menu.style.left = `${rect.right - 150}px`;
 
     menu.hidden = false;
     botao.setAttribute('aria-expanded', 'true');
-
     return;
   }
 
   const acao = event.target.closest('[data-acao]');
-
-  if (!acao) {
-    return;
-  }
+  if (!acao) return;
 
   const id = acao.dataset.id;
 
-  if (acao.dataset.acao === 'editar') {
-    window.location.href = `../editar-agente/index.html?id=${id}`;
+ if (acao.dataset.acao === 'editar') {
+    window.location.href = `../editar-corretor/index.html?id_corretor=${id}`;
     return;
   }
 
   if (acao.dataset.acao === 'excluir') {
-    window.location.href = `../excluir-agente/index.html?id=${id}`;
+    window.location.href = `../excluir-corretor/index.html?id_corretor=${id}`;
   }
 });
 
+// Fechar menus flutuantes ao clicar fora
 document.addEventListener('click', event => {
-
-  if (event.target.closest('.row-actions')) {
-    return;
-  }
+  if (event.target.closest('.row-actions')) return;
 
   document.querySelectorAll('.row-actions__menu').forEach(menu => {
     menu.hidden = true;
   });
-
   document.querySelectorAll('.row-actions__button').forEach(button => {
     button.setAttribute('aria-expanded', 'false');
   });
 });
 
-form.addEventListener('submit', event => {
+form.addEventListener('submit', async event => {
   event.preventDefault();
-
-  const query = normalize(searchInput.value);
-  if (!query) {
+  const query = searchInput.value.trim();
+  
+  if (!query && !cityInput.value && !ufSelect.value) {
     setFeedback('Informe um valor para pesquisar!');
-    resultsSummary.textContent = `Exibindo 0 de ${agents.length} agentes`;
-    resultsBody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum agente encontrado para os filtros informados.</td></tr>';
     return;
   }
 
-  filteragents();
+  await filterAgents();
 });
 
-clearButton.addEventListener('click', () => {
+clearButton.addEventListener('click', async () => {
   form.reset();
   setFeedback('');
-  renderResults(agents);
+  await init();
 });
 
-searchInput.addEventListener('input', () => {
+searchInput.addEventListener('input', async () => {
   setFeedback('');
-  if (!normalize(searchInput.value)) {
+  if (!searchInput.value.trim()) {
+    await init();
     return;
   }
-  filteragents();
+  await filterAgents();
 });
 
 searchInput.addEventListener('keydown', (event) => {
@@ -250,11 +177,17 @@ searchInput.addEventListener('keydown', (event) => {
   }
 });
 
-maritalStatus.addEventListener('change', filteragents);
-cityInput.addEventListener('input', filteragents);
-ufSelect.addEventListener('change', filteragents);
+cityInput.addEventListener('input', filterAgents);
+ufSelect.addEventListener('change', filterAgents);
 
-renderResults(agents);
+// Carregamento inicial ao abrir a página
+async function init() {
+  const corretores = await fetchAgents();
+  totalAgentsCount = corretores.length;
+  renderResults(corretores, totalAgentsCount);
+}
+
+init();
 
 // Navegação do menu
 document.querySelectorAll('[data-section]').forEach(button => {
@@ -282,4 +215,3 @@ document.querySelectorAll('[data-section]').forEach(button => {
         document.querySelector('#navigation-dialog').showModal();
     });
 });
-
