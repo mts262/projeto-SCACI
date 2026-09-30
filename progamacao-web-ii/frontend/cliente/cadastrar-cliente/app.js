@@ -307,6 +307,11 @@ document.querySelectorAll('[data-section]').forEach(button => {
       return;
     }
 
+    if (secao === 'Corretores') {
+            window.location.href = "../../corretor/acoes-corretor/index.html";
+            return;
+        }
+
     const navMessage = document.querySelector('#navigation-message');
     const navDialog = document.querySelector('#navigation-dialog');
 

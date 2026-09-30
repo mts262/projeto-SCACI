@@ -42,6 +42,11 @@ menuButtons.forEach((button) => {
             return;
         }
 
+        if (secao === 'Corretores') {
+            window.location.href = "../../corretor/acoes-corretor/index.html";
+            return;
+        }
+
         showUnavailable(
             `A seção “${secao}” ainda não está disponível no módulo de clientes.`
         );

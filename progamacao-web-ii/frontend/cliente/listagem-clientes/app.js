@@ -417,6 +417,11 @@ botoesMenu.forEach((botao) => {
             return;
         }
 
+        if (secao === 'Corretores') {
+            window.location.href = "../../corretor/acoes-corretor/index.html";
+            return;
+        }
+
         mostrarAviso(
             `O módulo ${secao} ainda não está disponível nesta versão.`
         );

@@ -272,7 +272,12 @@ botoesMenu.forEach((botao) => {
             return;
         }
 
-        if (secao === "corretores") {
+        if (secao === 'Clientes') {
+            window.location.href = "../../cliente/acoes-cliente/index.html";
+            return;
+        }
+
+        if (secao === 'Corretores') {
             window.location.href = "../acoes-corretor/index.html";
             return;
         }

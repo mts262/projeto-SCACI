@@ -155,6 +155,11 @@ document.querySelectorAll('[data-section]').forEach(button => {
             return;
         }
 
+        if (secao === 'Corretores') {
+            window.location.href = "../../corretor/acoes-corretor/index.html";
+            return;
+        }
+
         document.querySelector('#navigation-message').textContent =
             `A seção “${secao}” ainda não está disponível.`;
 
