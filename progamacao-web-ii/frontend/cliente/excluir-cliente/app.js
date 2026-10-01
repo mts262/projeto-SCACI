@@ -101,8 +101,12 @@ document.querySelector('#btn-excluir').addEventListener('click', () => {
 document.querySelector('#btn-nao').addEventListener('click', () => modal.close());
 
 // Fecha ao clicar no fundo escuro, fora da caixa
-modal.addEventListener('click', event => {
-  if (event.target === modal) modal.close();
+[modal, modalSucesso].forEach(dialogo => {
+    dialogo.addEventListener('click', event => {
+        if (event.target === dialogo) {
+            dialogo.close();
+        }
+    });
 });
 
 // Exclusão do clinete
