@@ -274,7 +274,37 @@ async function editarCorretor(req, res) {
         if (!corretorExistente) {
             return res.status(404).json({ mensagem: "Corretor não cadastrado" });
         }
-        
+        const creciDuplicado = await prisma.corretor.findFirst({
+            where: {
+                creci_corretor: dados.creci_corretor,
+                NOT: { id_corretor: id }
+            }
+        });
+        if (creciDuplicado) {
+            return res.status(400).json({ erro: 'Existe outro corretor cadastrado com esse CRECI!' });
+        }
+
+        // 2. Verifica se o CPF/CNPJ já pertence a OUTRO corretor
+        const cpfDuplicado = await prisma.corretor.findFirst({
+            where: {
+                cpf_cnpj: dados.cpf_cnpj,
+                NOT: { id_corretor: id }
+            }
+        });
+        if (cpfDuplicado) {
+            return res.status(400).json({ erro: 'Existe outro corretor cadastrado com esse CPF/CNPJ!' });
+        }
+
+        // 3. Verifica se o E-mail já pertence a OUTRO corretor
+        const emailDuplicado = await prisma.corretor.findFirst({
+            where: {
+                email: dados.email,
+                NOT: { id_corretor: id }
+            }
+        });
+        if (emailDuplicado) {
+            return res.status(400).json({ erro: 'Existe outro corretor cadastrado com esse email!' });
+        }
         // Tratamento seguro para a data de nascimento opcional
         let dataNascimentoFormatada = null;
         if (dados.data_nascimento && dados.data_nascimento.trim() !== "") {
