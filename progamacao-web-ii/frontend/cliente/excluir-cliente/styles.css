@@ -306,7 +306,8 @@ dialog::backdrop {
   background: rgba(0, 0, 0, .7);
 }
 
-#modal-exclusao {
+#modal-exclusao,
+#modal-sucesso {
   display: none;
   flex-direction: column;
   align-items: center;
@@ -314,17 +315,20 @@ dialog::backdrop {
   gap: 12px;
 }
 
-#modal-exclusao[open] {
+#modal-exclusao[open],
+#modal-sucesso[open] {
   display: flex;
 }
 
-#modal-exclusao h2 {
+#modal-exclusao h2,
+#modal-sucesso h2 {
   font-size: 18px;
   font-weight: 700;
   margin: 0;
 }
 
-#modal-exclusao p {
+#modal-exclusao p,
+#modal-sucesso p {
   font-size: 13px;
   color: var(--placeholder);
   margin: 0;
