@@ -1,168 +1,59 @@
-'use strict';
-const storageKey = 'scaci.corretores.v1';
-const $ = (selector) => document.querySelector(selector);
-const form = $('#broker-form');
-let brokers = [];
-let selectedId = null;
-let editingId = null;
-let activeMode = null;
-const normalize = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-const validRecord = (record) => record && ['id', 'name', 'creci', 'email', 'phone'].every((key) => typeof record[key] === 'string') && ['interno', 'externo'].includes(record.type);
-try {
-  const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-  if (!Array.isArray(saved) || !saved.every(validRecord) || new Set(saved.map((record) => record.id)).size !== saved.length) throw new Error('Invalid data');
-  brokers = saved;
-} catch {
-  $('#status').textContent = 'Não foi possível carregar os cadastros locais. Verifique se o armazenamento do navegador está disponível.';
+const actionButtons = document.querySelectorAll('[data-action]');
+const dialog = document.querySelector('#navigation-dialog');
+const dialogMessage = document.querySelector('#navigation-message');
+const menuButtons = document.querySelectorAll('[data-section]');
+
+const routes = {
+    cadastrar: '../cadastrar-corretor/index.html',
+    pesquisa: '../pesquisar-corretor/index.html',
+    editar: '../listagem-corretor/index.html',
+    excluir: '../listagem-corretor/index.html'
+};
+
+function showUnavailable(message) {
+    dialogMessage.textContent = message;
+    dialog.showModal();
 }
-function persist(next) {
-  try {
-    localStorage.setItem(storageKey, JSON.stringify(next));
-    brokers = next;
-    render();
-    return true;
-  } catch {
-    return false;
-  }
-}
-function render() {
-  const query = normalize($('#search').value.trim());
-  const type = $('#type-filter').value;
-  const filtered = brokers.filter((broker) => (!type || broker.type === type) && normalize(`${broker.name} ${broker.creci} ${broker.email}`).includes(query));
-  $('#brokers').replaceChildren();
-  for (const broker of filtered) {
-    const row = document.createElement('tr');
-    const nameCell = row.insertCell();
-    nameCell.append(document.createTextNode(broker.name));
-    const email = document.createElement('small');
-    email.textContent = broker.email;
-    nameCell.append(email);
-    row.insertCell().textContent = broker.creci;
-    const badge = document.createElement('span');
-    badge.className = 'type-badge';
-    badge.textContent = broker.type === 'interno' ? 'Interno' : 'Externo';
-    row.insertCell().append(badge);
-    if (activeMode === 'search') {
-      row.insertCell().textContent = broker.phone;
-    } else {
-      const button = document.createElement('button');
-      const label = activeMode === 'delete' ? 'Excluir' : 'Editar';
-      button.type = 'button';
-      button.className = activeMode === 'delete' ? 'danger' : 'edit-action';
-      button.textContent = label;
-      button.setAttribute('aria-label', `${label} ${broker.name}`);
-      button.addEventListener('click', () => handleAction(activeMode, broker.id));
-      row.insertCell().append(button);
-    }
-    $('#brokers').append(row);
-  }
-  $('#empty').hidden = filtered.length > 0;
-  $('#result-count').textContent = `${filtered.length} de ${brokers.length} corretor(es)`;
-}
-function openForm(broker) {
-  form.reset();
-  editingId = broker?.id || null;
-  $('#form-title').textContent = broker ? 'Editar corretor' : 'Cadastrar corretor';
-  $('#form-error').textContent = '';
-  for (const field of ['name', 'creci', 'type', 'email', 'phone']) {
-    form.elements[field].setCustomValidity('');
-    if (broker) form.elements[field].value = broker[field];
-  }
-  $('#broker-dialog').showModal();
-  form.elements.name.focus();
-}
-function handleAction(action, id) {
-  const broker = brokers.find((item) => item.id === id);
-  if (!broker) return;
-  selectedId = id;
-  if (action === 'edit') return openForm(broker);
-  if (action === 'delete') {
-    $('#delete-message').textContent = `O cadastro de ${broker.name} será removido deste navegador.`;
-    $('#delete-dialog').showModal();
-    return;
-  }
-}
-function showList(mode) {
-  activeMode = mode;
-  const titles = { edit: 'Editar corretor', search: 'Pesquisar corretor', delete: 'Excluir corretor' };
-  const hints = {
-    edit: 'Pesquise e selecione o corretor que deseja editar.',
-    search: 'Consulte os corretores pelo nome, CRECI ou e-mail.',
-    delete: 'Pesquise e selecione o corretor que deseja excluir.'
-  };
-  $('#list-title').textContent = titles[mode];
-  $('#list-help').textContent = hints[mode];
-  $('#action-column').textContent = mode === 'search' ? 'Telefone' : 'Ação';
-  $('#broker-list').hidden = false;
-  document.querySelectorAll('[data-mode]').forEach((button) => {
-    button.setAttribute('aria-expanded', String(button.dataset.mode === mode));
-  });
-  render();
-  $('#search').focus();
-}
-function closeList() {
-  const previousMode = activeMode;
-  activeMode = null;
-  $('#broker-list').hidden = true;
-  document.querySelectorAll('[data-mode]').forEach((button) => button.setAttribute('aria-expanded', 'false'));
-  if (previousMode) document.querySelector(`[data-mode="${previousMode}"]`).focus();
-}
-form.addEventListener('input', (event) => event.target.setCustomValidity?.(''));
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const data = Object.fromEntries(new FormData(form));
-  for (const key of Object.keys(data)) data[key] = data[key].trim();
-  for (const key of ['name', 'creci', 'email', 'phone']) {
-    if (!data[key]) {
-      form.elements[key].setCustomValidity('Preencha este campo.');
-      form.elements[key].reportValidity();
-      return;
-    }
-  }
-  if (![10, 11].includes(data.phone.replace(/\D/g, '').length)) {
-    form.elements.phone.setCustomValidity('Informe um telefone com DDD e 10 ou 11 dígitos.');
-    form.elements.phone.reportValidity();
-    return;
-  }
-  if (brokers.some((broker) => broker.id !== editingId && (normalize(broker.creci) === normalize(data.creci) || normalize(broker.email) === normalize(data.email)))) {
-    $('#form-error').textContent = 'Já existe um corretor com este CRECI ou e-mail.';
-    return;
-  }
-  const record = { ...data, id: editingId || crypto.randomUUID() };
-  const next = editingId ? brokers.map((broker) => broker.id === editingId ? record : broker) : [...brokers, record];
-  if (!persist(next)) {
-    $('#form-error').textContent = 'Não foi possível salvar. Verifique o armazenamento do navegador e tente novamente.';
-    return;
-  }
-  $('#broker-dialog').close();
-  $('#status').textContent = editingId ? 'Cadastro atualizado com sucesso.' : 'Corretor cadastrado com sucesso.';
-  if (activeMode) $('#search').focus();
-  else $('#new-broker').focus();
+
+actionButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        const action = button.dataset.action;
+        const target = routes[action];
+
+        if (target) {
+            window.location.href = target;
+            return;
+        }
+
+        showUnavailable('Essa funcionalidade ainda não está disponível nesta versão.');
+    });
 });
-$('#confirm-delete').addEventListener('click', () => {
-  if (!persist(brokers.filter((broker) => broker.id !== selectedId))) {
-    $('#delete-message').textContent = 'Não foi possível excluir. Verifique o armazenamento do navegador e tente novamente.';
-    return;
-  }
-  $('#delete-dialog').close();
-  $('#status').textContent = 'Corretor excluído com sucesso.';
-  if (activeMode) $('#search').focus();
-  else $('#new-broker').focus();
+
+menuButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+        const secao = button.dataset.section;
+
+        if (secao === 'Início') {
+            window.location.href = '../../tela-inicial/index.html';
+            return;
+        }
+
+        if (secao === 'Corretores') {
+            return;
+        }
+
+        if (secao === 'Clientes') {
+            window.location.href = '../../cliente/acoes-cliente/index.html';
+            return;
+        }
+
+        showUnavailable(
+            `A seção “${secao}” ainda não está disponível no módulo de corretores.`
+        );
+    });
 });
-$('#new-broker').addEventListener('click', () => {
-  closeList();
-  openForm();
+
+document.querySelectorAll('[data-close]').forEach((button) => {
+    button.addEventListener('click', () => dialog.close());
 });
-document.querySelectorAll('[data-mode]').forEach((button) => {
-  button.addEventListener('click', () => showList(button.dataset.mode));
-});
-$('#back-actions').addEventListener('click', closeList);
-$('#search').addEventListener('input', render);
-$('#type-filter').addEventListener('change', render);
-document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => button.closest('dialog').close()));
-document.querySelectorAll('[data-section]').forEach((button) => button.addEventListener('click', () => {
-  $('#navigation-message').textContent = `O módulo ${button.dataset.section} ainda não está disponível nesta tela.`;
-  $('#navigation-dialog').showModal();
-}));
-render();
 

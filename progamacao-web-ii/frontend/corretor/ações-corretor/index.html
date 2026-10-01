@@ -15,13 +15,13 @@
     <p class="menu-title">Menu</p>
     <nav>
       <button type="button" data-section="Início">Início</button>
-      <a href="../progamacao-web-ii/Front/index.html">Clientes</a>
+      <button type="button" data-section="Clientes">Clientes</button>
       <button type="button" data-section="Compradores">Compradores</button>
       <button type="button" data-section="Imóveis">Imóveis</button>
       <button type="button" data-section="Vendas">Vendas</button>
       <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
       <button type="button" data-section="Funcionários">Funcionários</button>
-      <a href="index.html" aria-current="page">Corretores</a>
+      <button type="button" data-section="Corretores" aria-current="page">Corretores</button>
     </nav>
     <p class="sidebar-footer">Seu negócio,<br>mais organizado.</p>
   </aside>
@@ -31,51 +31,27 @@
       <h1 id="page-title">Ações do <span>corretor</span></h1>
       <p class="muted">Selecione a ação que deseja realizar.</p>
       <nav class="broker-actions" aria-label="Ações do corretor">
-        <button id="new-broker" type="button" class="action-card">
+        <button id="new-broker" type="button" class="action-card" data-action="cadastrar">
           <span class="action-icon" aria-hidden="true">＋</span>
           <span>Cadastrar corretor</span>
         </button>
-        <button id="edit-broker" type="button" class="action-card" data-mode="edit" aria-controls="broker-list" aria-expanded="false">
+        <button id="edit-broker" type="button" class="action-card" data-action="editar">
           <span class="action-icon" aria-hidden="true">✎</span>
           <span>Editar corretor</span>
         </button>
-        <button id="search-broker" type="button" class="action-card" data-mode="search" aria-controls="broker-list" aria-expanded="false">
+        <button id="search-broker" type="button" class="action-card" data-action="pesquisa">
           <svg class="action-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>
           <span>Pesquisar corretor</span>
         </button>
-        <button id="delete-broker" type="button" class="action-card" data-mode="delete" aria-controls="broker-list" aria-expanded="false">
+        <button id="delete-broker" type="button" class="action-card" data-action="excluir">
           <svg class="action-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></svg>
           <span>Excluir corretor</span>
         </button>
       </nav>
-      <section id="broker-list" class="list-panel" aria-labelledby="list-title" hidden>
-        <div class="list-heading"><h2 id="list-title">Pesquisar corretor</h2><button type="button" id="back-actions">Voltar às ações</button></div>
-        <p id="list-help" class="list-help muted"></p>
-        <div class="filters"><div class="search-field"><label for="search">Buscar corretor</label><input type="search" id="search" placeholder="Nome, CRECI ou e-mail"></div><div><label for="type-filter">Tipo de corretor</label><select id="type-filter"><option value="">Todos os tipos</option value="interno">Interno</option><option value="externo">Externo</option></select></div></div>
-        <div class="table-wrap"><table><caption class="sr-only">Corretores e ações disponíveis</caption><thead><tr><th scope="col">Corretor</th><th scope="col">CRECI</th><th scope="col">Tipo</th><th scope="col" id="action-column">Telefone</th></tr></thead><tbody id="brokers"></tbody></table></div>
-        <div id="empty" class="empty" hidden><h3>Nenhum corretor encontrado</h3><p>Cadastre um corretor ou ajuste os filtros da busca.</p></div>
-        <p id="result-count" class="result-count" role="status"></p>
-      </section>
-      <p class="local-note">Os cadastros são salvos somente neste navegador. Esta tela ainda não está conectada ao servidor.</p>
-      <p id="status" role="status" aria-live="polite"></p>
     </section>
   </main>
-  <dialog id="broker-dialog" aria-labelledby="form-title">
-    <div class="dialog-heading"><h2 id="form-title">Cadastrar corretor</h2><button type="button" class="close" data-close aria-label="Fechar">×</button></div>
-    <form id="broker-form">
-      <div class="form-grid">
-        <div class="wide"><label for="name">Nome completo</label><input id="name" name="name" required maxlength="100" autocomplete="name"></div>
-        <div><label for="creci">CRECI</label><input id="creci" name="creci" required maxlength="15" placeholder="Ex.: 12345-F/BA"></div>
-        <div><label for="type">Tipo</label><select id="type" name="type"><option value="interno">Interno</option><option value="externo">Externo</option></select></div>
-        <div class="wide"><label for="email">E-mail</label><input id="email" name="email" type="email" required maxlength="200" autocomplete="email"></div>
-        <div class="wide"><label for="phone">Telefone</label><input id="phone" name="phone" type="tel" required maxlength="20" autocomplete="tel" placeholder="(77) 99999-9999"></div>
-      </div>
-      <p id="form-error" role="alert"></p>
-      <div class="dialog-actions"><button type="button" data-close>Cancelar</button><button type="submit" class="primary">Salvar corretor</button></div>
-    </form>
-  </dialog>
-  <dialog id="delete-dialog" aria-labelledby="delete-title"><h2 id="delete-title">Excluir corretor?</h2><p id="delete-message"></p><p class="muted">Esta ação não pode ser desfeita.</p><div class="dialog-actions"><button type="button" data-close autofocus>Cancelar</button><button type="button" class="danger" id="confirm-delete">Excluir corretor</button></div></dialog>
   <dialog id="navigation-dialog" aria-labelledby="navigation-title"><h2 id="navigation-title">Módulo em desenvolvimento</h2><p id="navigation-message"></p><div class="dialog-actions"><button type="button" data-close>Voltar</button></div></dialog>
 </body>
 </html>
+
 
