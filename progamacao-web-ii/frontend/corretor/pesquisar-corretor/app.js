@@ -51,11 +51,11 @@ async function filterAgents() {
 }
 
 function renderResults(filtered, total = totalAgentsCount) {
-  resultsSummary.textContent = `Exibindo ${filtered.length} de ${total} agentes`;
+  resultsSummary.textContent = `Exibindo ${filtered.length} de ${total} corretores`;
 
   if (!filtered.length) {
-    setFeedback('Agente não encontrado!');
-    resultsBody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum agente encontrado para os filtros informados.</td></tr>';
+    setFeedback('Corretor não encontrado!');
+    resultsBody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum corretor encontrado para os filtros informados.</td></tr>';
     return;
   }
 

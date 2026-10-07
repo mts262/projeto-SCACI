@@ -3,7 +3,7 @@ const modalSucesso = document.querySelector('#modal-sucesso');
 const deleteButton = document.querySelector('#btn-excluir');
 const confirmButton = document.querySelector('#btn-confirmar');
 const parametros = new URLSearchParams(window.location.search);
-const id_corretor = parametros.get("id_corretor");
+const id_corretor = parametros.get("id");
 
 function apenasDigitos(valor = "") {
     return String(valor).replace(/\D/g, "");

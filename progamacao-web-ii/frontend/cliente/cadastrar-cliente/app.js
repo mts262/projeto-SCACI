@@ -200,10 +200,13 @@ document.getElementById('postalCode').addEventListener('blur', async event => {
 form.addEventListener('submit', async event => {
   event.preventDefault();
 
+  const email = form.elements.email.value.trim();
+
   const checks = [
-    ['name', form.elements.name.value.trim().length >= 3, 'Informe o nome completo.', '#name-error'],
-    ['document', [11, 14].includes(digits(form.elements.document.value).length), 'CPF ou CNPJ inválido.', '#document-error'],
-    ['postalCode', digits(form.elements.postalCode.value).length === 8, 'CEP inválido.', '#postal-error'],
+      ['name', form.elements.name.value.trim().length >= 3, 'Informe o nome completo.', '#name-error'],
+      ['document', [11, 14].includes(digits(form.elements.document.value).length), 'CPF ou CNPJ inválido.', '#document-error'],
+      ['postalCode', digits(form.elements.postalCode.value).length === 8, 'CEP inválido.', '#postal-error'],
+      ['email', email === '' || form.elements.email.validity.valid, 'E-mail inválido!', '#email-error'],
   ];
 
   let temErro = false;

@@ -111,11 +111,8 @@ form.addEventListener('submit', async event => {
     ['creci', form.elements.creci.value.trim().length >= 3, 'Informe o CRECI.'],
     ['name', form.elements.name.value.trim().length >= 3, 'Informe o nome completo.'],
     ['document', [11, 14].includes(digits(form.elements.document.value).length), 'Informe 11 dígitos para CPF ou 14 para CNPJ.', '#document-error'],
-    ['birthDate', Boolean(form.elements.birthDate.value), 'Informe a data de nascimento.'],
     ['phone', [10, 11].includes(digits(form.elements.phone.value).length), 'Informe o telefone com DDD.'],
     ['email', form.elements.email.value.trim() !== '', 'Informe o e-mail.'],
-    ['postalCode', digits(form.elements.postalCode.value).length === 8, 'Informe os 8 dígitos do CEP.', '#postal-error'],
-    ...['street', 'number', 'neighborhood', 'city', 'state'].map(key => [key, Boolean(form.elements[key].value.trim()), 'Preencha este campo.'])
   ];
 
   for (const [key, valid, message, errorSelector] of checks) {

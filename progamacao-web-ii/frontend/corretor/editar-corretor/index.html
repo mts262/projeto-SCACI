@@ -69,7 +69,7 @@
 
           <div class="field">
             <label for="birthDate">Data de Nascimento</label>
-            <input type="date" id="birthDate" name="birthDate" autocomplete="bday" required>
+            <input type="date" id="birthDate" name="birthDate" autocomplete="bday">
           </div>
 
           <div class="field">
@@ -86,19 +86,19 @@
         <div class="additional-fields">
           <div class="field postal-field">
             <label for="postalCode">CEP</label>
-            <input id="postalCode" name="postalCode" autocomplete="postal-code" inputmode="numeric" required maxlength="9" aria-describedby="postal-error">
+            <input id="postalCode" name="postalCode" autocomplete="postal-code" inputmode="numeric" maxlength="9" aria-describedby="postal-error">
             <span class="error" id="postal-error"></span>
           </div>
 
           <div class="field">
             <label for="street">Logradouro</label>
-            <input id="street" name="street" autocomplete="address-line1" required maxlength="100">
+            <input id="street" name="street" autocomplete="address-line1" maxlength="100">
           </div>
 
           <div class="address-row">
             <div class="field">
               <label for="number">Nº</label>
-              <input id="number" name="number" required maxlength="10">
+              <input id="number" name="number" maxlength="10">
             </div>
             <div class="field">
               <label for="complement">Complemento</label>
@@ -108,17 +108,17 @@
 
           <div class="field">
             <label for="neighborhood">Bairro</label>
-            <input id="neighborhood" name="neighborhood" required maxlength="100">
+            <input id="neighborhood" name="neighborhood" maxlength="100">
           </div>
 
           <div class="city-row">
             <div class="field">
               <label for="city">Cidade</label>
-              <input id="city" name="city" autocomplete="address-level2" required maxlength="100">
+              <input id="city" name="city" autocomplete="address-level2" maxlength="100">
             </div>
             <div class="field">
               <label for="state">UF</label>
-              <select id="state" name="state" autocomplete="address-level1" required aria-label="UF"></select>
+              <select id="state" name="state" autocomplete="address-level1" aria-label="UF"></select>
             </div>
           </div>
 

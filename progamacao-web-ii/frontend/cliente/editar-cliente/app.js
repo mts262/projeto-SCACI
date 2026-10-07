@@ -53,7 +53,7 @@ function updateMarriageEndDateState() {
 function updateSpouseVisibility() {
   const isMarried = form.elements.maritalStatus.value === 'Casado';
   spouseField.hidden = !isMarried;
-  ['spouseName', 'spouseDocument', 'spouseBirthDate', 'spousePropertyRegime', 'marriageDate', 'marriageActive', 'marriageEndDate', 'unionProof'].forEach(key => {
+  ['spouseName', 'spouseDocument', 'spousePropertyRegime', 'marriageDate', 'marriageActive', 'marriageEndDate', 'unionProof'].forEach(key => {
     const control = form.elements[key];
     if (control) control.disabled = !isMarried;
   });
@@ -110,6 +110,9 @@ function preencherFormulario(cliente) {
   if (form.elements.city) form.elements.city.value = cliente.cidade || '';
   if (form.elements.state) form.elements.state.value = cliente.uf || '';
   if (form.elements.postalCode) form.elements.postalCode.value = cliente.cep || '';
+  if (form.elements.complement) {
+    form.elements.complement.value = cliente.complemento || '';
+}
 
   if (form.elements.maritalStatus) {
     form.elements.maritalStatus.value = estadoCivilMap[cliente.estado_civil] || cliente.estado_civil || 'Solteiro';
@@ -251,7 +254,6 @@ form.addEventListener('submit', async event => {
   if (isMarried) {
     checks.push(['spouseName', form.elements.spouseName.value.trim().length >= 3, 'Informe o nome do cônjuge.']);
     checks.push(['spouseDocument', [11].includes(digits(form.elements.spouseDocument.value).length), 'Informe o CPF do cônjuge.']);
-    checks.push(['spouseBirthDate', Boolean(form.elements.spouseBirthDate.value), 'Informe a data de nascimento do cônjuge.']);
     checks.push(['spousePropertyRegime', form.elements.spousePropertyRegime.value !== '', 'Informe o regime de bens.']);
     checks.push(['marriageDate', Boolean(form.elements.marriageDate.value), 'Informe a data do casamento.']);
     checks.push(['marriageActive', form.elements.marriageActive.value !== '', 'Informe se o casamento está ativo.']);
@@ -314,6 +316,7 @@ form.addEventListener('submit', async event => {
       formData.append('cidade', form.elements.city.value.trim());
       formData.append('uf', form.elements.state.value);
       formData.append('cep', digits(form.elements.postalCode.value));
+      formData.append('complemento', form.elements.complement.value.trim());
       formData.append('estado_civil', estadoCivilMapReverse[form.elements.maritalStatus.value] || 'solteiro');
 
       if (form.elements.email.value.trim()) {
