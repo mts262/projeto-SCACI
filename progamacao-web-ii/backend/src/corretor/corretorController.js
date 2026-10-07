@@ -124,10 +124,17 @@ async function cadastrarCorretor(req, res) {
  */
 async function pesquisarCorretor(req, res) {
   try {
-    const { nome, cpf_cnpj, creci_corretor } = req.query;
+    const {q, nome, cpf_cnpj, creci_corretor } = req.query;
     const where = {};
 
-
+    if (q && q.trim() !== "") {
+      const termo = q.trim();
+      where.OR = [
+        { nome: { contains: termo } },
+        { cpf_cnpj: { contains: termo } },
+        { creci_corretor: { contains: termo } }
+      ];
+    }
     if (nome && nome.trim() !== "") {
       where.nome = {
         contains: nome.trim(),
