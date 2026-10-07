@@ -1,3 +1,5 @@
+/* Regras específicas da tela; o tema compartilhado tem prioridade. */
+@layer screen {
 :root {
   color-scheme: dark;
   --page: #181818; 
@@ -326,4 +328,5 @@ select:valid {
   font-size: 13px; 
   color: #b2ddbc; 
   margin-bottom: 8px; 
+}
 }

@@ -1,3 +1,5 @@
+/* Regras específicas da tela; o tema compartilhado tem prioridade. */
+@layer screen {
 :root {
   color-scheme: dark;
   --page: #1c1c1b;
@@ -450,4 +452,6 @@ dialog p {
   .action-grid {
     grid-template-columns: 1fr;
   }
+}
+
 }

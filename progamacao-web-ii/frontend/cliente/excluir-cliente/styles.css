@@ -1,3 +1,5 @@
+/* Regras específicas da tela; o tema compartilhado tem prioridade. */
+@layer screen {
 :root {
   color-scheme: dark;
   --page: #121212;
@@ -409,4 +411,6 @@ dialog::backdrop {
   .civil-field {
     width: 100%;
   }
+}
+
 }

@@ -1,3 +1,5 @@
+/* Regras específicas da tela; o tema compartilhado tem prioridade. */
+@layer screen {
 :root {
   color-scheme: dark;
   --page: #181818;
@@ -393,4 +395,6 @@ dialog::backdrop {
   .uf-row {
     grid-template-columns: 1fr;
   }
+}
+
 }

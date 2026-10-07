@@ -1,3 +1,5 @@
+/* Regras específicas da tela; o tema compartilhado tem prioridade. */
+@layer screen {
 :root {
   color-scheme: dark;
   --page: #1c1c1b;
@@ -371,4 +373,6 @@ input[type="date"] {
   .save-button {
     width: 100%;
   }
+}
+
 }

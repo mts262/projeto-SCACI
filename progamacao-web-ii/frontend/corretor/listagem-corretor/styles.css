@@ -1,3 +1,5 @@
+/* Regras específicas da tela; o tema compartilhado tem prioridade. */
+@layer screen {
 :root {
   color-scheme: dark;
   --page: #181818;
@@ -249,4 +251,5 @@ dialog::backdrop {
   border-radius: 4px;
   font-weight: 500;
   margin-top: 16px;
+}
 }
