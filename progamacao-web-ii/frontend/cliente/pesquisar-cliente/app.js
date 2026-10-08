@@ -81,7 +81,7 @@ function filterClients() {
     
     // Garantindo suporte se o endereço vier de um objeto aninhado ou campos diretos
     const cidade = client.cidade || client.city || client.endereco?.cidade || "";
-    const estado = client.estado || client.state || client.endereco?.estado || "";
+    const estado = client.uf || client.estado || client.state || client.endereco?.estado || "";
     const estadoCivil = client.estado_civil || client.maritalStatus || "";
 
     const documentDigits = cleanDigits(doc);
