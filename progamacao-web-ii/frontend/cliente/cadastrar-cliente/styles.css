@@ -1,3 +1,10 @@
+/* Cadastro mais compacto em telas grandes, mantendo a ordem dos campos. */
+@media (min-width: 1101px) {
+  #client-form .form-body {
+    width: 60%;
+  }
+}
+
 /* Regras específicas da tela; o tema compartilhado tem prioridade. */
 @layer screen {
 :root {

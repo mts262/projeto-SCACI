@@ -138,7 +138,7 @@ function renderResults(filtered) {
             aria-label="Ações de ${escaparHtml(nome)}"
             aria-expanded="false"
           >
-            …
+            ⋯
           </button>
 
           <div class="row-actions__menu" hidden>
