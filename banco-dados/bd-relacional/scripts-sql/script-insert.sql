@@ -9,7 +9,7 @@ INSERT INTO Funcionario (id_funcionario, nome, cpf, salario, funcao, email, tele
 -- ====================================================================
 -- 2. POVOAMENTO DA TABELA: Corretor (3 corretores, 1 interno chamado Kleber)
 -- ====================================================================
-INSERT INTO Corretor (id_corretor, tipo, creci_corretor, nome, cpf_cnpj, data_nascimento, telefone, email, logradouro, numero, bairro, complemento, cidade, uf, cep) VALUES
+INSERT INTO corretor (id_corretor, tipo, creci_corretor, nome, cpf_cnpj, data_nascimento, telefone, email, logradouro, numero, bairro, complemento, cidade, uf, cep) VALUES
 (1, 'interno', 'CRECI12345', 'Kleber Vieira Lima', '33344455566', '1985-05-20', '11933334444', 'kleber.lima@imobiliaria.com', 'Av. Paulista', '1000', 'Bela Vista', 'Apto 42', 'São Paulo', 'SP', '01310100'),
 (2, 'externo', 'CRECI54321', 'Marcos Rocha', '44455566677', '1990-11-12', '11944445555', 'marcos.rocha@gmail.com', 'Rua Augusta', '500', 'Consolação', NULL, 'São Paulo', 'SP', '01305000'),
 (3, 'externo', 'CRECI98765', 'Patricia Silva', '55566677788', '1988-03-15', '11955556666', 'patricia.silva@gmail.com', 'Alameda Lorena', '1200', 'Jardins', 'Bloco B', 'São Paulo', 'SP', '01424001');
@@ -17,7 +17,7 @@ INSERT INTO Corretor (id_corretor, tipo, creci_corretor, nome, cpf_cnpj, data_na
 -- ====================================================================
 -- 3. POVOAMENTO DA TABELA: Cliente (21 Clientes no total - Com 2 Neutros)
 -- ====================================================================
-INSERT INTO Cliente (id_cliente, nome, cpf_cnpj, data_nascimento, telefone, email, url_comprovante_residencia, logradouro, numero, bairro, complemento, cidade, uf, cep, estado_civil) VALUES
+INSERT INTO cliente (id_cliente, nome, cpf_cnpj, data_nascimento, telefone, email, url_comprovante_residencia, logradouro, numero, bairro, complemento, cidade, uf, cep, estado_civil) VALUES
 -- Compradores (9)
 (1, 'Alice Silva', '12345678901', '1995-01-10', '11977770001', 'alice@email.com', 'http://doc/res1.pdf', 'Rua A', '1', 'Centro', NULL, 'São Paulo', 'SP', '01000000', 'casado'),
 (2, 'Bruno Santos', '23456789012', '1992-02-15', '11977770002', 'bruno@email.com', 'http://doc/res2.pdf', 'Rua B', '2', 'Centro', NULL, 'São Paulo', 'SP', '01000000', 'casado'),
@@ -75,7 +75,7 @@ INSERT INTO Proprietario (id_cliente, prazo_venda, observacao) VALUES
 -- ====================================================================
 -- 6. POVOAMENTO DA TABELA: Conjuge (4 cônjuges)
 -- ====================================================================
-INSERT INTO Conjuge (cpf, nome, regime_bens, data_nascimento, url_comprovante_uniao, data_casamento, casamento_ativo, data_fim_casamento, id_cliente) VALUES
+INSERT INTO conjuge (cpf, nome, regime_bens, data_nascimento, url_comprovante_uniao, data_casamento, casamento_ativo, data_fim_casamento, id_cliente) VALUES
 ('99988877711', 'Marcos Silva', 'Comunhão Parcial', '1993-05-12', 'http://doc/uniao1.pdf', '2017-05-10', 'sim', NULL, 1),
 ('99988877722', 'Fernanda Santos', 'Comunhão Universal', '1994-07-22', 'http://doc/uniao2.pdf', '2015-10-01', 'nao', '2022-02-28', 2),
 ('99988877733', 'Maria Pereira', 'Comunhão Parcial', '1977-02-14', 'http://doc/uniao3.pdf', '2025-05-27', 'sim', NULL, 10),

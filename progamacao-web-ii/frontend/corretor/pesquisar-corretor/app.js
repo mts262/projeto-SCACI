@@ -2,8 +2,7 @@ const form = document.querySelector('#search-form');
 const resultsBody = document.querySelector('#results-body');
 const resultsSummary = document.querySelector('#results-summary');
 const searchInput = document.querySelector('#searchInput');
-const cityInput = document.querySelector('#city');
-const ufSelect = document.querySelector('#uf');
+const tipoSelect = document.querySelector('#tipo');
 const clearButton = document.querySelector('#clear-filter');
 const feedback = document.querySelector('#search-feedback');
 
@@ -37,13 +36,11 @@ async function fetchAgents(params = {}) {
 
 async function filterAgents() {
   const query = searchInput.value.trim();
-  const city = cityInput.value.trim();
-  const uf = ufSelect.value;
+  const tipo = tipoSelect.value;
 
   const queryParams = {};
-  if (query) queryParams.nome = query;
-  if (city) queryParams.cidade = city;
-  if (uf) queryParams.uf = uf;
+  if (query) queryParams.q = query;
+  if (tipo) queryParams.tipo = tipo;
 
   const corretores = await fetchAgents(queryParams);
   totalAgentsCount = corretores.length;
@@ -144,10 +141,11 @@ document.addEventListener('click', event => {
 });
 
 form.addEventListener('submit', async event => {
-  event.preventDefault();
+ event.preventDefault();
   const query = searchInput.value.trim();
-  
-  if (!query && !cityInput.value && !ufSelect.value) {
+  const tipo = tipoSelect.value;
+
+  if (!query && !tipo) {
     setFeedback('Informe um valor para pesquisar!');
     return;
   }
@@ -176,9 +174,7 @@ searchInput.addEventListener('keydown', (event) => {
     form.requestSubmit();
   }
 });
-
-cityInput.addEventListener('input', filterAgents);
-ufSelect.addEventListener('change', filterAgents);
+tipoSelect.addEventListener('change', filterAgents);
 
 // Carregamento inicial ao abrir a página
 async function init() {
