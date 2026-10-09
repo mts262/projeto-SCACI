@@ -124,7 +124,7 @@ async function cadastrarCorretor(req, res) {
  */
 async function pesquisarCorretor(req, res) {
   try {
-    const {q, nome, cpf_cnpj, creci_corretor } = req.query;
+    const {q, nome, cpf_cnpj, creci_corretor , tipo} = req.query;
     const where = {};
 
     if (q && q.trim() !== "") {
@@ -149,6 +149,9 @@ async function pesquisarCorretor(req, res) {
       where.creci_corretor = {
         contains: creci_corretor.trim(),
       };
+    }
+    if (tipo && tipo.trim() !== "") {
+      where.tipo = tipo.trim();
     }
     const corretores = await prisma.corretor.findMany({
       where,

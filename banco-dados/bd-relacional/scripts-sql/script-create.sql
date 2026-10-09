@@ -1,7 +1,7 @@
 CREATE DATABASE scaci;
 USE scaci;
 
-CREATE TABLE Cliente (
+CREATE TABLE cliente (
     id_cliente INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cpf_cnpj VARCHAR(14) NOT NULL UNIQUE,
@@ -76,7 +76,7 @@ CREATE TABLE Venda (
     id_funcionario INTEGER UNSIGNED
 );
 
-CREATE TABLE Corretor (
+CREATE TABLE corretor (
     id_corretor INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     tipo ENUM('interno', 'externo') NOT NULL,
     creci_corretor VARCHAR(15) NOT NULL UNIQUE,
@@ -126,7 +126,7 @@ CREATE TABLE Agenda_Visita (
     id_funcionario INTEGER UNSIGNED
 );
 
-CREATE TABLE Conjuge (
+CREATE TABLE conjuge (
     cpf VARCHAR(11),
     nome VARCHAR(100) NOT NULL,
     regime_bens VARCHAR(50) NOT NULL,
