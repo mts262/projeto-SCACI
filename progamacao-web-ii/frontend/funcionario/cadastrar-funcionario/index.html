@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1c1c1b">
+  <title>Cadastrar Funcionário | S.C.A.C.I.</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../../shared/styles.css">
+</head>
+<body>
+  <header class="brand" aria-label="S.C.A.C.I."><span>S.C.A.</span><span>C.I.</span></header>
+
+  <aside class="sidebar">
+    <div class="menu-title">Menu</div>
+    <nav>
+      <button type="button" data-section="Início">Início</button>
+      <button type="button" data-section="Clientes">Clientes</button>
+      <button type="button" data-section="Compradores">Compradores</button>
+      <button type="button" data-section="Imóveis">Imóveis</button>
+      <button type="button" data-section="Vendas">Vendas</button>
+      <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
+      <button type="button" data-section="Funcionários" class="active" aria-current="page">Funcionários</button>
+      <button type="button" data-section="Corretores">Corretores</button>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="breadcrumb">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <ol>
+        <li>Início</li>
+        <li>Cadastrar Funcionário</li>
+      </ol>
+    </div>
+
+    <div class="content">
+      <h1>Cadastrar <span>Funcionário</span></h1>
+
+      <form id="employee-form" novalidate>
+        <div class="form-body">
+          <div class="field">
+            <input id="name" name="name" placeholder="Nome Completo" autocomplete="name" required maxlength="100">
+          </div>
+
+          <div class="field">
+            <input id="document" name="document" placeholder="CPF" inputmode="numeric" required maxlength="14" aria-describedby="document-error">
+            <span class="error" id="document-error"></span>
+          </div>
+
+          <div class="field">
+            <input type="number" id="salary" name="salary" placeholder="Salário" required min="0" max="99999.99" step="0.01">
+          </div>
+
+          <div class="field">
+            <input id="jobTitle" name="jobTitle" placeholder="Função Exercida" maxlength="50">
+          </div>
+
+          <div class="field">
+            <input type="email" id="email" name="email" placeholder="Email" autocomplete="email" required maxlength="100">
+            <span class="error" id="email-error"></span>
+          </div>
+
+          <div class="field">
+            <input type="tel" id="phone" name="phone" placeholder="Telefone" autocomplete="tel-national" required maxlength="16">
+          </div>
+        </div>
+        
+        <div class="save-area">
+          <p id="save-status" role="status" aria-live="polite"></p>
+          <button class="save-button" type="submit">Salvar Cadastro</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <dialog id="navigation-dialog">
+    <p id="navigation-message"></p>
+    <form method="dialog">
+      <button>OK</button>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
