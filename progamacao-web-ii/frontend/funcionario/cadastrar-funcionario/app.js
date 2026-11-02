@@ -2,7 +2,7 @@ const form = document.getElementById('employee-form');
 const saveStatus = document.getElementById('save-status');
 const cpfInput = document.getElementById('document');
 const emailInput = document.getElementById('email');
-const salarioInput = document.getElementById('salary');
+const salaryInput = document.getElementById('salary');
 
 // Helper para manter apenas dígitos
 const digits = (str) => (str || '').replace(/\D/g, '');
@@ -78,14 +78,38 @@ emailInput.addEventListener('input', () => {
 });
 
 // Validação de salário
-salarioInput.addEventListener('input', () => {
-  const valor = parseFloat(salarioInput.value);
+// Máscara de salário (centavos)
+const salaryError = document.getElementById('salary-error');
+const SALARIO_MAX = 99999.99;
 
-  if (valor > 99999.99) {
-    salarioInput.setCustomValidity('Salário máximo: R$ 99.999,99');
-    salarioInput.reportValidity();
+function salarioParaNumero(texto) {
+  const centavos = digits(texto);
+  return centavos ? Number(centavos) / 100 : 0;
+}
+
+salaryInput.addEventListener('input', () => {
+  const numero = salarioParaNumero(salaryInput.value);
+
+  if (digits(salaryInput.value) === '') {
+    salaryInput.value = '';
+    salaryError.textContent = '';
+    salaryInput.setCustomValidity('');
+    return;
+  }
+
+  salaryInput.value = numero.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  if (numero > SALARIO_MAX) {
+    salaryError.textContent = 'Salário máximo: R$ 99.999,99';
+    salaryInput.setCustomValidity('Salário acima do máximo');
+  } else if (numero <= 0) {
+    salaryInput.setCustomValidity('Salário inválido');
   } else {
-    salarioInput.setCustomValidity('');
+    salaryError.textContent = '';
+    salaryInput.setCustomValidity('');
   }
 });
 
@@ -106,7 +130,7 @@ form.addEventListener('submit', async (e) => {
         const dadosFuncionario = {
             nome: form.elements.name.value,
             cpf: digits(form.elements.document.value),
-            salario: form.elements.salary.value,
+            salario: salarioParaNumero(form.elements.salary.value),
             funcao: form.elements.jobTitle.value.trim() || null,
             telefone: digits(form.elements.phone.value),
             email: form.elements.email.value.trim().toLowerCase(),
@@ -167,10 +191,11 @@ document.querySelectorAll('[data-section]').forEach(button => {
             return;
         }
 
-        if (secao === 'Funcionários') {
-            window.location.href = "../acoes-funcionario/index.html";
-            return;
-        }
+        // TODO: reativar quando a tela acoes-funcionario existir
+        // if (secao === 'Funcionários') {
+        //     window.location.href = "../acoes-funcionario/index.html";
+        //     return;
+        // }
 
         document.querySelector('#navigation-message').textContent =
             `A seção “${secao}” ainda não está disponível.`;

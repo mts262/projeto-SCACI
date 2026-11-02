@@ -52,7 +52,8 @@
           </div>
 
           <div class="field">
-            <input type="number" id="salary" name="salary" placeholder="Salário" required min="0" max="99999.99" step="0.01">
+            <input id="salary" name="salary" placeholder="Salário (Máximo: R$ 99.999,99)" inputmode="numeric" required aria-describedby="salary-error">
+            <span class="error" id="salary-error"></span>
           </div>
 
           <div class="field">
