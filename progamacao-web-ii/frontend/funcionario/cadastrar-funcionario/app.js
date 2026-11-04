@@ -171,35 +171,4 @@ form.addEventListener('submit', async (e) => {
     }
 });
 
-// Navegação do menu
-document.querySelectorAll('[data-section]').forEach(button => {
-    button.addEventListener('click', () => {
-        const secao = button.dataset.section;
 
-        if (secao === 'Início') {
-            window.location.href = "../../tela-inicial/index.html";
-            return;
-        }
-
-        if (secao === 'Clientes') {
-            window.location.href = "../../cliente/acoes-cliente/index.html";
-            return;
-        }
-
-        if (secao === 'Corretores') {
-            window.location.href = "../../corretor/acoes-corretor/index.html";
-            return;
-        }
-
-        // TODO: reativar quando a tela acoes-funcionario existir
-        // if (secao === 'Funcionários') {
-        //     window.location.href = "../acoes-funcionario/index.html";
-        //     return;
-        // }
-
-        document.querySelector('#navigation-message').textContent =
-            `A seção “${secao}” ainda não está disponível.`;
-
-        document.querySelector('#navigation-dialog').showModal();
-    });
-});
