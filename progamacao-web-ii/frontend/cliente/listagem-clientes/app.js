@@ -37,7 +37,6 @@ const resumoTabela = document.querySelector("#resumo-tabela");
 const paginacao = document.querySelector("#paginacao");
 const dialogoAviso = document.querySelector("#dialogo-aviso");
 const mensagemAviso = document.querySelector("#mensagem-aviso");
-const botoesMenu = document.querySelectorAll("[data-secao]");
 
 let clientes = [];
 let paginaAtual = 1;
@@ -400,34 +399,6 @@ fecharMenuAcoes();
 window.addEventListener("scroll", fecharMenuAcoes, true);
 
 window.addEventListener("resize", fecharMenuAcoes);
-
-
-botoesMenu.forEach((botao) => {
-    botao.addEventListener("click", () => {
-
-        const secao = botao.dataset.secao;
-
-        if (secao === "Início") {
-            window.location.href = "../../tela-inicial/index.html";
-            return;
-        }
-
-        if (secao === "Clientes") {
-            window.location.href = "../acoes-cliente/index.html";
-            return;
-        }
-
-        if (secao === 'Corretores') {
-            window.location.href = "../../corretor/acoes-corretor/index.html";
-            return;
-        }
-
-        mostrarAviso(
-            `O módulo ${secao} ainda não está disponível nesta versão.`
-        );
-    });
-});
-
 
 carregarClientes()
 

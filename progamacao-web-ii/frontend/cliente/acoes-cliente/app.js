@@ -1,7 +1,6 @@
 const actionButtons = document.querySelectorAll('[data-action]');
 const dialog = document.querySelector('#navigation-dialog');
 const dialogMessage = document.querySelector('#navigation-message');
-const menuButtons = document.querySelectorAll('[data-section]');
 
 const routes = {
     cadastrar: '../cadastrar-cliente/index.html',
@@ -26,29 +25,5 @@ actionButtons.forEach((button) => {
         }
 
         showUnavailable('Essa funcionalidade ainda não está disponível nesta versão.');
-    });
-});
-
-menuButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-        const secao = button.dataset.section;
-
-        if (secao === 'Início') {
-            window.location.href = '../../tela-inicial/index.html';
-            return;
-        }
-
-        if (secao === 'Clientes') {
-            return;
-        }
-
-        if (secao === 'Corretores') {
-            window.location.href = "../../corretor/acoes-corretor/index.html";
-            return;
-        }
-
-        showUnavailable(
-            `A seção “${secao}” ainda não está disponível no módulo de clientes.`
-        );
     });
 });

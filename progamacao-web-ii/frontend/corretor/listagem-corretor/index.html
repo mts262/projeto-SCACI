@@ -6,7 +6,8 @@
     <meta name="theme-color" content="#1c1c1b" />
     <title>Corretores Cadastrados | S.C.A.C.I.</title>
     <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="../../shared/styles.css">
+    <link rel="stylesheet" href="../../shared/styles.css">
+    <script src="../../shared/nav.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -17,14 +18,14 @@
     <aside class="sidebar" aria-label="Menu principal">
       <p class="menu-title">Menu</p>
       <nav>
-        <button type="button" data-secao="Início">Início</button>
-        <button type="button" data-secao="Clientes">Clientes</button>
-        <button type="button" data-secao="Compradores">Compradores</button>
-        <button type="button" data-secao="Imóveis">Imóveis</button>
-        <button type="button" data-secao="Vendas">Vendas</button>
-        <button type="button" data-secao="Agenda de Visita">Agenda de Visita</button>
-        <button type="button" data-secao="Funcionários">Funcionários</button>
-        <button type="button" data-secao="Corretores" class="active" aria-current="page">Corretores</button>
+        <button type="button" data-section="Início">Início</button>
+        <button type="button" data-section="Clientes">Clientes</button>
+        <button type="button" data-section="Compradores">Compradores</button>
+        <button type="button" data-section="Imóveis">Imóveis</button>
+        <button type="button" data-section="Vendas">Vendas</button>
+        <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
+        <button type="button" data-section="Funcionários">Funcionários</button>
+        <button type="button" data-section="Corretores" class="active" aria-current="page">Corretores</button>
       </nav>
     </aside>
 
@@ -64,11 +65,10 @@
       </section>
     </main>
 
-    <dialog id="dialogo-aviso" aria-labelledby="titulo-aviso">
-      <h2 id="titulo-aviso">Módulo em desenvolvimento</h2>
-      <p id="mensagem-aviso">Essa funcionalidade ainda não está disponível nesta versão.</p>
+    <dialog id="navigation-dialog">
+      <p id="navigation-message"></p>
       <form method="dialog">
-        <button class="primary-button" type="submit">Voltar</button>
+        <button>Voltar</button>
       </form>
     </dialog>
   </body>

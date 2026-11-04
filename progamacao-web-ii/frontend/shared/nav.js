@@ -13,7 +13,12 @@ document.querySelectorAll('[data-section]').forEach(button => {
     const secao = button.dataset.section;
 
     if (ROTAS[secao]) {
-      window.location.href = RAIZ + ROTAS[secao];
+      const destino = RAIZ + ROTAS[secao];
+
+      // Já está na tela de ações dessa seção: não recarrega
+      if (destino === window.location.href.split('?')[0].split('#')[0]) return;
+
+      window.location.href = destino;
       return;
     }
 

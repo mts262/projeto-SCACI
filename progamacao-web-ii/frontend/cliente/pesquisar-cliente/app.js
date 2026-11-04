@@ -247,32 +247,3 @@ carregarClientesBackend()
       '<tr><td colspan="5" class="empty-state">Erro de conexão com o banco de dados/API.</td></tr>';
     resultsSummary.textContent = "Exibindo 0 de 0 clientes";
   });
-
-document.querySelectorAll("[data-section]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const secao = button.dataset.section;
-
-    if (secao === "Início") {
-      window.location.href = "../../tela-inicial/index.html";
-      return;
-    }
-
-    if (secao === "Clientes") {
-      window.location.href = "../acoes-cliente/index.html";
-      return;
-    }
-
-    if (secao === 'Corretores') {
-            window.location.href = "../../corretor/acoes-corretor/index.html";
-            return;
-        }
-
-    const navMsg = document.querySelector("#navigation-message");
-    const navDlg = document.querySelector("#navigation-dialog");
-
-    if (navMsg && navDlg) {
-      navMsg.textContent = `A seção “${secao}” ainda não está disponível.`;
-      navDlg.showModal();
-    }
-  });
-});

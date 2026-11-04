@@ -23,23 +23,3 @@ actionButtons.forEach((button) => {
     showUnavailable(messages[action] || 'Essa funcionalidade ainda não está disponível nesta versão.');
   });
 });
-
-menuButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    if (button.dataset.section === 'Clientes') {
-      window.location.href = "../cliente/acoes-cliente/index.html";
-      return;
-    }
-
-    if (button.dataset.section === 'Corretores') {
-      window.location.href = "../corretor/acoes-corretor/index.html";
-      return;
-    }
-
-    if (secao === 'Início') {
-            return;
-        }
-
-    showUnavailable(`A seção “${button.dataset.section}” ainda não está disponível no sistema.`);
-  });
-});
