@@ -41,7 +41,7 @@
             <div class="personal-field">
                 <div class="field">
                     <label for="name">Nome</label>
-                    <input id="name" name="name" autocomplete="name" required maxlength="100">
+                    <input id="name" name="name" autocomplete="name"  required maxlength="100">
                 </div>
 
                 <div class="field">
@@ -52,7 +52,7 @@
 
                 <div class="field">
                     <label for="salario">Salario Base</label>
-                    <input type="number" id="salario" name="salario" step="0.01" min="0" max="99999.99" placeholder="0,00" required>
+                    <input type="number" id="salario" name="salario" step="0.01" min="0" max="99999.99" placeholder="0,00" required aria-describedby="salary-error">
                 </div>
 
                 <div class="field">
@@ -62,20 +62,19 @@
 
                 <div class="field">
                     <label for="email">E-mail</label>
-                    <input type="email" id="email" name="email" autocomplete="tel-national" required maxlength="100">
+                    <input type="email" id="email" name="email" autocomplete="email" required maxlength="100">
                 </div>
 
                 <div class="field">
                     <label for="phone">Telefone</label>
                     <input type="tel" id="phone" name="phone" autocomplete="tel-national" required maxlength="16">
                 </div>
-
-                <div class="field">
-                    <p id="save-status"role="status" aria-live="polite"></p>
-                    <button class="save-button" type="submit">Salvar edição</button>
-                </div>
             </div>
         </form>
+          <div class="save-area">
+                    <p id="save-status"role="status" aria-live="polite"></p>
+                    <button class="save-button" type="submit"form="funcionario-form">Salvar edição</button>
+                </div>
     </section>
   </main>
   
