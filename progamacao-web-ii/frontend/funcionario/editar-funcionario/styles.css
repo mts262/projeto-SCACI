@@ -1,0 +1,335 @@
+/* Regras específicas da tela de Funcionários; o tema compartilhado tem prioridade. */
+@layer screen {
+:root {
+  color-scheme: dark;
+  --page: #1c1c1b;
+  --panel: #121212;
+  --field: #292929;
+  --text: #eee;
+  --muted: #aaa;
+  --blue: #7db3f5;
+  --gold: #e4bb5e;
+  --danger: #f19a9a;
+  --border: #393939;
+  font-family: "Century Gothic", "Trebuchet MS", Arial, sans-serif;
+  background: var(--page);
+  color: var(--text);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; min-height: 100%; }
+
+body {
+  background: var(--page);
+  color: var(--text);
+}
+
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 4px;
+}
+
+.brand {
+  height: 89px;
+  padding: 16px 21px;
+  font: 32px Georgia, serif;
+  letter-spacing: -1px;
+  color: var(--blue);
+}
+
+.brand span:last-child { color: var(--gold); }
+
+.sidebar {
+  position: absolute;
+  top: 89px;
+  left: 0;
+  width: 212px;
+  padding: 8px 9px;
+}
+
+.menu-title {
+  color: var(--gold);
+  font-size: 16px;
+  margin: 14px 16px 36px;
+}
+
+.sidebar nav {
+  display: grid;
+  gap: 7px;
+}
+
+.sidebar button, .sidebar a {
+  border: 0;
+  text-align: left;
+  background: transparent;
+  color: #ddd;
+  font-weight: 700;
+  font-size: 15px;
+  border-radius: 5px;
+  padding: 6px 20px;
+  min-height: 30px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar button:hover,
+.sidebar a:hover,
+.sidebar button[aria-current="page"],
+.sidebar a[aria-current="page"] {
+  background: #2c2c2c;
+  color: var(--blue);
+}
+
+main {
+  margin-left: 212px;
+  background: var(--panel);
+  min-height: calc(100vh - 89px);
+  border-radius: 18px 18px 0 18px;
+}
+
+.breadcrumb {
+  height: 49px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid #353535;
+  padding: 0 23px;
+  color: #919191;
+  font-size: 13px;
+}
+
+.breadcrumb svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  flex-shrink: 0;
+}
+
+.breadcrumb ol {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  gap: 9px;
+  margin: 0;
+}
+
+.breadcrumb li + li::before {
+  content: "/";
+  margin-right: 9px;
+}
+
+.breadcrumb li:first-child { color: #ccc; }
+
+/* Conteúdo principal alinhado à esquerda */
+.contet, .content {
+  padding: 24px 46px 40px 84px;
+  max-width: none;
+  margin: 0;
+}
+
+h1 {
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  margin: 0 0 32px;
+}
+
+h1 span { color: var(--blue); }
+
+/* Bloco dos inputs mantido na largura ideal */
+#funcionario-form,
+.personal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  max-width: 680px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ddd;
+}
+
+/* Estilo dos inputs com borda esquerda e inferior */
+input:not([type="file"]),
+select {
+  width: 100%;
+  min-width: 0;
+  background: var(--field);
+  color: #b8b8b8;
+  border: 0;
+  border-left: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+  border-radius: 5px;
+  height: 44px;
+  padding: 0 14px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+input:focus,
+select:focus {
+  color: var(--text);
+  border-color: var(--blue);
+}
+
+input::placeholder {
+  color: #777;
+}
+
+.error {
+  min-height: 0;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+/* Área do botão livre - perfeitamente alinhada com a extremidade direita dos campos */
+.save-area-free {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 24px;
+  width: 100%;
+  max-width: 680px; /* Se quiser mover o botão mais para a direita de forma independente, altere aqui para ex: 750px ou 100% */
+}
+
+#save-status {
+  margin: 0;
+  min-height: 1.2em;
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.save-button {
+  background: var(--blue);
+  color: #101c2b;
+  font-weight: 700;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 22px;
+  min-width: 150px;
+  min-height: 44px;
+}
+
+.save-button:hover { background: #a1c9fa; }
+
+.save-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Modal de Navegação */
+#navigation-dialog {
+  width: min(540px, calc(100vw - 32px));
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+#navigation-dialog::backdrop {
+  background: rgba(0,0,0,0.6);
+}
+
+#navigation-dialog h2 {
+  margin-top: 0;
+  color: var(--gold);
+}
+
+#navigation-dialog form {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+/* Responsividade */
+@media (max-width: 1100px) {
+  .contet, .content {
+    padding: 28px 32px;
+  }
+  .sidebar {
+    width: 190px;
+  }
+  main {
+    margin-left: 190px;
+  }
+}
+
+@media (max-width: 760px) {
+  .brand {
+    height: 70px;
+    padding: 16px 20px;
+    font-size: 30px;
+  }
+  .sidebar {
+    position: static;
+    width: 100%;
+    padding: 0 12px 16px;
+  }
+  .menu-title {
+    display: none;
+  }
+  .sidebar nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 4px;
+  }
+  .sidebar button, .sidebar a {
+    white-space: nowrap;
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+  main {
+    margin: 0 10px;
+    min-height: calc(100vh - 136px);
+    border-radius: 16px 16px 0 0;
+  }
+  .breadcrumb {
+    gap: 15px;
+    padding: 0 18px;
+  }
+  .contet, .content {
+    padding: 24px 20px 30px;
+  }
+  h1 {
+    font-size: 29px;
+    margin-bottom: 25px;
+  }
+  #funcionario-form,
+  .personal-field,
+  .save-area {
+    max-width: 100%;
+  }
+  .save-area {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .save-button {
+    width: 100%;
+  }
+}
+
+}
