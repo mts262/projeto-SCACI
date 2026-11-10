@@ -1,3 +1,91 @@
+import prisma from "../database.js";
+
+/**
+ * @author Matheus Pereira Rodrigues
+ *
+ * Verifica se os campos obrigatórios (NOT NULL) do funcionário foram devidamente preenchidos para o cadastro.
+ *
+ * @param {Object} dados - Objeto contendo os dados do funcionário a serem verificados.
+ * @returns {Array<string>} Array - contendo os nomes dos campos obrigatórios que não foram preenchidos.
+ */
+function verificarDadosFuncionário(dados) {
+    const obrigatorios = [
+        "nome",
+        "cpf",
+        "salario",
+        "email",
+        "telefone"
+    ];
+
+    let faltando = [];
+
+    for (const obrigatorio of obrigatorios) {
+        const dado = dados[obrigatorio];
+
+        if (dado === null || dado === "" || dado === undefined) {
+            faltando.push(obrigatorio);
+        }
+    }
+
+    return faltando;
+}
+
+/**
+ * @author Matheus Pereira Rodrigues
+ *
+ * Insere um novo funcionário no banco de dados.
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera `req.body`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna o status HTTP e os dados do funcionário criado.
+ */
+async function cadastrarFuncionario(req, res) {
+    const dados = req.body;
+
+    let faltando = verificarDadosFuncionário(dados);
+
+    if (faltando.length > 0) {
+        return res.status(400).json({ erro: `Preencha todos os campos obrigatórios! (${faltando.join(", ")})` });
+    }
+
+    try {
+
+        // Valida CPF duplicado
+        const funcionarioCpfExistente = await prisma.funcionario.findUnique({
+            where: { cpf: dados.cpf }
+        });
+
+        if (funcionarioCpfExistente) {
+            return res.status(400).json({ erro: 'Existe um funcionário cadastrado com esse CPF!' });
+        }
+
+        // Valida email duplicado
+        const funcionarioEmailExistente = await prisma.funcionario.findUnique({
+            where: { email: dados.email }
+        })
+            
+        if (funcionarioEmailExistente) {
+            return res.status(400).json({ erro: 'Existe um funcionário cadastrado com esse email!' });
+        }
+
+        const funcionario = await prisma.funcionario.create({
+            data: {
+                nome: dados.nome,
+                cpf: dados.cpf,
+                salario: dados.salario,
+                funcao: dados.funcao,
+                email: dados.email,
+                telefone: dados.telefone,
+             }
+        });
+
+        return res.status(200).json({ funcionario });
+
+    } catch (error) {
+        return res.status(500).json({ erro: 'Erro ao inserir no banco', detalhes: error.message });
+    }
+}
+
 /**
  * @author Matheus Pereira Rodrigues
  *
@@ -23,7 +111,7 @@ async function pesquisarFuncionario(req, res) {
         { funcao: { contains: termo } }
       ];
     }
-    
+
     if (nome && nome.trim() !== "") {
       where.nome = {
         contains: nome.trim(),
@@ -82,4 +170,10 @@ async function pesquisarFuncionario(req, res) {
   }
 }
 
-export { pesquisarFuncionario };
+export { 
+    cadastrarFuncionario,
+    //editarFuncionario,
+    //excluirFuncionario,
+    pesquisarFuncionario,
+    //buscarFuncionarioPorID 
+  };

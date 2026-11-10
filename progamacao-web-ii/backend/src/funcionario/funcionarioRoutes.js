@@ -1,10 +1,10 @@
 import express from "express";
 import {
   cadastrarFuncionario,
-  editarFuncionario,
-  excluirFuncionario,
+  //editarFuncionario,
+  //excluirFuncionario,
   pesquisarFuncionario,
-  buscarFuncionarioPorID
+  //buscarFuncionarioPorID
 } from "./funcionarioController.js";
 
 const router = express.Router();
@@ -16,13 +16,13 @@ router.post("/funcionario", cadastrarFuncionario);
 router.get("/funcionarios", pesquisarFuncionario);
 
 // Buscar um funcionario por ID
-router.get("/funcionario/:id_funcionario", buscarFuncionarioPorID);
+//router.get("/funcionario/:id_funcionario", buscarFuncionarioPorID);
 
 // Editar funcionário por ID
-router.put("/funcionario/:id_funcionario", editarFuncionario);
+//router.put("/funcionario/:id_funcionario", editarFuncionario);
 
 // Excluir funcionario por ID
-router.delete("/funcionario/:id_funcionario", excluirFuncionario);
+//router.delete("/funcionario/:id_funcionario", excluirFuncionario);
 
 
 export default router;
