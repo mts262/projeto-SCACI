@@ -100,7 +100,7 @@ async function cadastrarFuncionario(req, res) {
  */
 async function pesquisarFuncionario(req, res) {
   try {
-    const { q, nome, cpf, funcao, salarioMin, salarioMax } = req.query;
+    const { q, nome, cpf, funcao } = req.query;
     const where = {};
 
     if (q && q.trim() !== "") {
@@ -128,28 +128,6 @@ async function pesquisarFuncionario(req, res) {
       where.funcao = {
         contains: funcao.trim(),
       };
-    }
-
-    const paraNumero = (valor) => {
-    if (typeof valor !== "string" || valor.trim() === "") return null;
-    const numero = Number(valor.trim().replace(",", "."));
-    return Number.isFinite(numero) ? numero : null;
-    };
-
-    const min = paraNumero(salarioMin);
-    const max = paraNumero(salarioMax);
-
-    if (min !== null && max !== null && min > max) {
-    return res.status(400).json({
-        erro: "O salário mínimo não pode ser maior que o máximo.",
-    });
-    }
-
-    if (min !== null || max !== null) {
-    where.salario = {
-        ...(min !== null && { gte: min }),
-        ...(max !== null && { lte: max }),
-    };
     }
     
     const funcionarios = await prisma.funcionario.findMany({

@@ -24,5 +24,4 @@ router.put("/funcionario/:id_funcionario", editarFuncionario);
 // Excluir funcionario por ID
 router.delete("/funcionario/:id_funcionario", excluirFuncionario);
 
-
 export default router;
