@@ -5,7 +5,7 @@ const searchInput = document.querySelector('#searchInput');
 const clearButton = document.querySelector('#clear-filter');
 const feedback = document.querySelector('#search-feedback');
 
-// URL base da sua API no back-end 
+// URL base da API no back-end 
 const API_URL = 'http://localhost:3000/funcionarios';
 
 let totalEmployeesCount = 0;
