@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1c1c1b">
+  <title>Cadastrar Comprador | S.C.A.C.I.</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../../shared/styles.css">
+</head>
+<body>
+  <header class="brand" aria-label="S.C.A.C.I."><span>S.C.A.</span><span>C.I.</span></header>
+
+  <aside class="sidebar">
+    <div class="menu-title">Menu</div>
+    <nav>
+      <button type="button" data-section="Início">Início</button>
+      <button type="button" data-section="Clientes">Clientes</button>
+      <button type="button" data-section="Compradores" class="active" aria-current="page">Compradores</button>
+      <button type="button" data-section="Imóveis">Imóveis</button>
+      <button type="button" data-section="Vendas">Vendas</button>
+      <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
+      <button type="button" data-section="Funcionários">Funcionários</button>
+      <button type="button" data-section="Corretores">Corretores</button>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="breadcrumb">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <ol>
+        <li>Início</li>
+        <li>Cadastrar Comprador</li>
+      </ol>
+    </div>
+
+    <div class="content">
+      <h1>Cadastrar <span>Comprador</span></h1>
+
+      <form id="buyer-form" novalidate>
+        <div class="form-body">
+          <div class="field combobox">
+          <input
+            id="client"
+            name="clientSearch"
+            placeholder="Cliente (digite o nome ou CPF)"
+            autocomplete="off"
+            required
+            maxlength="100"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-controls="client-list"
+            aria-describedby="client-error">
+          <input type="hidden" id="clientId" name="clientId">
+          <ul id="client-list" class="combobox-list" role="listbox" hidden>
+            <!-- preenchido pelo JS, por exemplo:
+            <li role="option" data-id="12">Maria Souza <small>123.456.789-00</small></li>
+            -->
+          </ul>
+          <span class="error" id="client-error"></span>
+        </div>
+
+          <div class="field">
+            <input id="income" name="income" placeholder="Renda Mensal" inputmode="numeric" required aria-describedby="income-error">
+            <span class="error" id="income-error"></span>
+          </div>
+
+          <div class="field">
+            <input id="occupation" name="occupation" placeholder="Profissão" maxlength="50">
+          </div>
+
+          <div class="field">
+            <input id="desiredPropertyType" name="desiredPropertyType" placeholder="Tipo de Imóvel Desejado" maxlength="50">
+          </div>
+
+          <div class="field">
+            <input id="minValue" name="minValue" placeholder="Valor Mínimo" inputmode="numeric" aria-describedby="minValue-error">
+            <span class="error" id="minValue-error"></span>
+          </div>
+
+          <div class="field">
+            <input id="maxValue" name="maxValue" placeholder="Valor Máximo" inputmode="numeric" aria-describedby="maxValue-error">
+            <span class="error" id="maxValue-error"></span>
+          </div>
+
+          <div class="field date-field">
+            <span class="calendar-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </span>
+            <input type="text" id="purchaseDeadline" name="purchaseDeadline" placeholder="Prazo da Compra" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'">
+            <span class="error" id="purchaseDeadline-error"></span>
+          </div>
+
+          <div class="field">
+            <input id="desiredDescription" name="desiredDescription" placeholder="Descrição Desejada" maxlength="255">
+          </div>
+
+          <div class="field">
+            <input id="minArea" name="minArea" placeholder="Área Mínima Desejada" inputmode="decimal" aria-describedby="minArea-error">
+            <span class="error" id="minArea-error"></span>
+          </div>
+
+          <div class="field">
+            <input id="desiredLocation" name="desiredLocation" placeholder="Localização Desejada" maxlength="100">
+          </div>
+
+          <div class="field">
+            <select id="paymentType" name="paymentType" required>
+              <option value="" disabled selected hidden>Tipo de pagamento...</option>
+              <option value="a_vista">À Vista</option>
+              <option value="prazo">Prazo</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="upload" id="drop-zone">
+              <span id="file-name">Comprovante de Renda, clique para fazer upload ou arraste o arquivo aqui (PDF, PNG, JPG)</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <input type="file" id="proof" accept="application/pdf,image/png,image/jpeg" required aria-describedby="file-error">
+            </div>
+            <span class="error" id="file-error" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="save-area">
+          <p id="save-status" role="status" aria-live="polite"></p>
+          <button class="save-button" type="submit">Salvar Cadastro</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <dialog id="navigation-dialog">
+    <p id="navigation-message"></p>
+    <form method="dialog">
+      <button>OK</button>
+    </form>
+  </dialog>
+
+  <script src="../../shared/nav.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
