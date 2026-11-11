@@ -308,7 +308,7 @@ async function excluirFuncionario(req, res) {
         });
 
         if (!funcionario) {
-            return res.status(404).json({erro: "Funcionario não encontrado!"});
+            return res.status(404).json({erro: "Funcionário não encontrado!"});
         }
 
         await prisma.funcionario.delete({
@@ -317,13 +317,13 @@ async function excluirFuncionario(req, res) {
             }
         });
 
-        return res.status(200).json({ mensagem: 'Funcionario excluído com sucesso!' });
+        return res.status(200).json({ mensagem: 'Funcionário excluído com sucesso!' });
 
     } catch (error) {
-        console.error("Erro ao excluir funcionario:", error);
+        console.error("Erro ao excluir funcionário:", error);
 
     return res.status(500).json({
-        erro: "Erro ao excluir o funcionario!",
+        erro: "Erro ao excluir o funcionário!",
         detalhes: error.message
     });
     }
