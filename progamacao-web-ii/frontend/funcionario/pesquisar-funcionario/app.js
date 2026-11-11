@@ -2,10 +2,10 @@ const form = document.querySelector('#search-form');
 const resultsBody = document.querySelector('#results-body');
 const resultsSummary = document.querySelector('#results-summary');
 const searchInput = document.querySelector('#searchInput');
-const tipoSelect = document.querySelector('#tipo');
 const clearButton = document.querySelector('#clear-filter');
 const feedback = document.querySelector('#search-feedback');
 
+// URL base da sua API no back-end 
 const API_URL = 'http://localhost:3000/funcionarios';
 
 let totalEmployeesCount = 0;
@@ -35,11 +35,9 @@ async function fetchEmployees(params = {}) {
 
 async function filterEmployees() {
   const query = searchInput.value.trim();
-  const tipo = tipoSelect.value;
 
   const queryParams = {};
   if (query) queryParams.q = query;
-  if (tipo) queryParams.tipo = tipo;
 
   const funcionarios = await fetchEmployees(queryParams);
   totalEmployeesCount = funcionarios.length;
@@ -142,9 +140,8 @@ document.addEventListener('click', event => {
 form.addEventListener('submit', async event => {
   event.preventDefault();
   const query = searchInput.value.trim();
-  const tipo = tipoSelect.value;
 
-  if (!query && !tipo) {
+  if (!query) {
     setFeedback('Informe um valor para pesquisar!');
     return;
   }
@@ -173,7 +170,6 @@ searchInput.addEventListener('keydown', (event) => {
     form.requestSubmit();
   }
 });
-tipoSelect.addEventListener('change', filterEmployees);
 
 // Carregamento inicial ao abrir a página
 async function init() {
