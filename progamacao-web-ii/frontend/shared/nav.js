@@ -5,7 +5,8 @@ const ROTAS = {
   'Início':       'tela-inicial/index.html',
   'Clientes':     'cliente/acoes-cliente/index.html',
   'Corretores':   'corretor/acoes-corretor/index.html',
-  'Funcionários': 'funcionario/acoes-funcionario/index.html'
+  'Funcionários': 'funcionario/acoes-funcionario/index.html',
+  'Compradores': 'comprador/acoes-comprador/index.html'
 };
 
 document.querySelectorAll('[data-section]').forEach(button => {
