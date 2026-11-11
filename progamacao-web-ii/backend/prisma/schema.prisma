@@ -105,6 +105,7 @@ model funcionario {
   telefone       String          @db.VarChar(20)
   agenda_visita  agenda_visita[]
   venda          venda[]
+@@map("Funcionario")
 }
 
 model imovel {

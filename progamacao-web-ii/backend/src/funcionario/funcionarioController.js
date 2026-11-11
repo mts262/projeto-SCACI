@@ -170,10 +170,124 @@ async function pesquisarFuncionario(req, res) {
   }
 }
 
+function obterIdFuncionario(parametro) {
+    const id = Number(parametro);
+    if (!/^\d+$/.test(parametro) || id < 1 || id > 4_294_967_295) {
+        return null;
+    }
+    return id;
+}
+
+async function buscarFuncionarioPorID(req, res) {
+    const idFuncionario = obterIdFuncionario(req.params.id_funcionario);
+    if (idFuncionario === null) {
+        return res.status(400).json({ erro: "ID do funcionário inválido." });
+    }
+
+    try {
+        const funcionario = await prisma.funcionario.findUnique({
+            where: { id_funcionario: idFuncionario },
+        });
+
+        if (!funcionario) {
+            return res.status(404).json({ erro: "Funcionário não encontrado." });
+        }
+
+        return res.status(200).json(funcionario);
+    } catch (erro) {
+        console.error("Erro ao buscar funcionário:", erro);
+        return res.status(500).json({ erro: "Não foi possível buscar o funcionário." });
+    }
+}
+
+function validarEdicaoFuncionario(corpo) {
+    if (!corpo || typeof corpo !== "object" || Array.isArray(corpo)) {
+        return { erro: "Envie os campos do funcionário em JSON." };
+    }
+
+    const faltando = verificarDadosFuncionário(corpo);
+    if (faltando.length > 0) {
+        return { erro: `Preencha todos os campos obrigatórios! (${faltando.join(", ")})` };
+    }
+
+    const limitesDeTexto = { nome: 100, cpf: 11, funcao: 50, email: 200, telefone: 20 };
+    const dados = {};
+
+    for (const [campo, valorRecebido] of Object.entries(corpo)) {
+        const valor = typeof valorRecebido === "string" ? valorRecebido.trim() : valorRecebido;
+
+        if (campo === "salario") {
+            const salario = typeof valor === "number" ? String(valor) : valor;
+            if (typeof salario !== "string" || !/^\d+(\.\d{1,2})?$/.test(salario) || Number(salario) > 99_999.99) {
+                return { erro: "Informe um salário entre 0 e 99999,99, com até duas casas decimais." };
+            }
+            dados.salario = salario;
+            continue;
+        }
+
+        if (!Object.hasOwn(limitesDeTexto, campo)) {
+            return { erro: "A edição contém um campo não permitido." };
+        }
+
+        if (campo === "funcao" && (valor === null || valor === "")) {
+            dados.funcao = null;
+            continue;
+        }
+
+        const limite = limitesDeTexto[campo];
+        if (typeof valor !== "string" || !valor || valor.length > limite) {
+            return { erro: `O campo ${campo} deve ter de 1 a ${limite} caracteres.` };
+        }
+
+        if (campo === "cpf" && !/^\d{11}$/.test(valor)) {
+            return { erro: "Informe os 11 dígitos do CPF." };
+        }
+
+        if (campo === "email" && !/^[^\s@]+@[^\s@]+$/.test(valor)) {
+            return { erro: "Informe um e-mail válido." };
+        }
+
+        dados[campo] = valor;
+    }
+
+    return { dados };
+}
+
+async function editarFuncionario(req, res) {
+    const idFuncionario = obterIdFuncionario(req.params.id_funcionario);
+    if (idFuncionario === null) {
+        return res.status(400).json({ erro: "ID do funcionário inválido." });
+    }
+
+    const { dados, erro } = validarEdicaoFuncionario(req.body);
+    if (erro) {
+        return res.status(400).json({ erro });
+    }
+
+    try {
+        const funcionario = await prisma.funcionario.update({
+            where: { id_funcionario: idFuncionario },
+            data: dados,
+        });
+
+        return res.status(200).json(funcionario);
+    } catch (erro) {
+        if (erro.code === "P2025") {
+            return res.status(404).json({ erro: "Funcionário não encontrado." });
+        }
+        if (erro.code === "P2002") {
+            return res.status(409).json({ erro: "CPF ou e-mail já cadastrado para outro funcionário." });
+        }
+
+        console.error("Erro ao atualizar funcionário:", erro);
+        return res.status(500).json({ erro: "Não foi possível salvar a edição." });
+    }
+}
+
 export { 
     cadastrarFuncionario,
-    //editarFuncionario,
+    editarFuncionario,
     //excluirFuncionario,
     pesquisarFuncionario,
-    //buscarFuncionarioPorID 
+    buscarFuncionarioPorID 
   };
