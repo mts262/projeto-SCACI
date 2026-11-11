@@ -284,10 +284,55 @@ async function editarFuncionario(req, res) {
     }
 }
 
+/**
+ * @author Davi Oliveira Ferreira Santos
+ *
+ * Exclui um funcionario do banco de dados pelo seu ID.
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id_funcionario` ou `req.params.id`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna mensagem de sucesso ou mensagem de erro.
+ */
+async function excluirFuncionario(req, res) {
+    const id = Number(req.params.id_funcionario || req.params.id);
+
+    if (isNaN(id)) {
+        return res.status(400).json({ erro: "O ID fornecido deve ser um número válido." });
+    }
+
+    try {
+        const funcionario = await prisma.funcionario.findUnique({
+            where: {
+                id_funcionario: id
+            }
+        });
+
+        if (!funcionario) {
+            return res.status(404).json({erro: "Funcionario não encontrado!"});
+        }
+
+        await prisma.funcionario.delete({
+            where: {
+                id_funcionario: id
+            }
+        });
+
+        return res.status(200).json({ mensagem: 'Funcionario excluído com sucesso!' });
+
+    } catch (error) {
+        console.error("Erro ao excluir funcionario:", error);
+
+    return res.status(500).json({
+        erro: "Erro ao excluir o funcionario!",
+        detalhes: error.message
+    });
+    }
+}
+
 export { 
     cadastrarFuncionario,
     editarFuncionario,
-    //excluirFuncionario,
+    excluirFuncionario,
     pesquisarFuncionario,
     buscarFuncionarioPorID 
   };

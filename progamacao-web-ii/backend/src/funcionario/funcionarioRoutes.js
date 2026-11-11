@@ -2,7 +2,7 @@ import express from "express";
 import {
   cadastrarFuncionario,
   editarFuncionario,
-  //excluirFuncionario,
+  excluirFuncionario,
   pesquisarFuncionario,
   buscarFuncionarioPorID
 } from "./funcionarioController.js";
@@ -22,7 +22,7 @@ router.get("/funcionario/:id_funcionario", buscarFuncionarioPorID);
 router.put("/funcionario/:id_funcionario", editarFuncionario);
 
 // Excluir funcionario por ID
-//router.delete("/funcionario/:id_funcionario", excluirFuncionario);
+router.delete("/funcionario/:id_funcionario", excluirFuncionario);
 
 
 export default router;
