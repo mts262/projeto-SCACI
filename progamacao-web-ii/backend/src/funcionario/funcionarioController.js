@@ -183,9 +183,9 @@ function validarEdicaoFuncionario(corpo) {
         return { erro: "Envie os campos do funcionário em JSON." };
     }
 
-    const faltando = verificarDadosFuncionário(corpo);
-    if (faltando.length > 0) {
-        return { erro: `Preencha todos os campos obrigatórios! (${faltando.join(", ")})` };
+    // Se nenhum campo foi enviado para atualização
+    if (Object.keys(corpo).length === 0) {
+        return { erro: "Forneça pelo menos um campo para atualizar." };
     }
 
     const limitesDeTexto = { nome: 100, cpf: 11, funcao: 50, email: 200, telefone: 20 };
@@ -230,7 +230,6 @@ function validarEdicaoFuncionario(corpo) {
 
     return { dados };
 }
-
 async function editarFuncionario(req, res) {
     const idFuncionario = obterIdFuncionario(req.params.id_funcionario);
     if (idFuncionario === null) {
