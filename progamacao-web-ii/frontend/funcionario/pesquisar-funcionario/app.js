@@ -57,8 +57,8 @@ function renderResults(filtered, total = totalEmployeesCount) {
   const rows = filtered.map(employee => `
   <tr>
     <td>${employee.nome}</td>
-    <td>${employee.cpf_cnpj}</td>
-    <td>${employee.cargo}</td>
+    <td>${employee.cpf}</td>
+    <td>${employee.funcao}</td>
     <td>${employee.email}</td>
 
     <td class="row-actions">
