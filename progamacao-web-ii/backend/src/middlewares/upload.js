@@ -1,15 +1,21 @@
 import multer from 'multer';
 import path from 'path';
+import fs from 'node:fs';
+
+const diretoriosUpload = {
+    comprovante_residencia: "uploads/comprovantes-residencia/",
+    comprovante_uniao: "uploads/comprovantes-uniao/",
+    comprovante_renda: "uploads/comprovantes-renda/"
+};
 
 // Configura como e onde salvar os arquivos no disco local
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        // Aponta para a pasta 'uploads' dentro da raiz do backend e suas subpastas
-        if (file.fieldname === "comprovante_residencia") {
-            cb(null, "uploads/comprovantes-residencia/");
-        } else if (file.fieldname === "comprovante_uniao") {
-            cb(null, "uploads/comprovantes-uniao/");
+        const diretorio = diretoriosUpload[file.fieldname];
+        if (!diretorio) {
+            return cb(new Error("Campo de upload inválido."));
         }
+        fs.mkdir(diretorio, { recursive: true }, (erro) => cb(erro, diretorio));
     },
     filename: (req, file, cb) => {
         // Gera um nome único (timestamp + número aleatório + extensão)
@@ -23,3 +29,25 @@ const storage = multer.diskStorage({
 
 // Instância do Multer exportada para uso nas rotas
 export const upload = multer({ storage });
+
+export const uploadComprovanteRenda = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const extensoesPorTipo = {
+            "application/pdf": [".pdf"],
+            "image/png": [".png"],
+            "image/jpeg": [".jpg", ".jpeg"]
+        };
+        const extensoes = extensoesPorTipo[file.mimetype];
+        const extensao = path.extname(file.originalname).toLowerCase();
+
+        if (!extensoes?.includes(extensao)) {
+            const erro = new Error("Envie o comprovante de renda em PDF, PNG ou JPG.");
+            erro.code = "TIPO_ARQUIVO_INVALIDO";
+            return cb(erro);
+        }
+
+        return cb(null, true);
+    }
+}).single("comprovante_renda");

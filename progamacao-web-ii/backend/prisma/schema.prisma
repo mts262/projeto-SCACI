@@ -48,6 +48,8 @@ model comprador {
   agenda_visita         agenda_visita[]
   cliente               cliente                   @relation(fields: [id_cliente], references: [id_cliente], onDelete: NoAction, onUpdate: NoAction, map: "FK_Comprador_2")
   venda                 venda[]
+
+  @@map("Comprador")
 }
 
 model conjuge {
@@ -63,6 +65,7 @@ model conjuge {
   cliente               cliente                 @relation(fields: [id_cliente], references: [id_cliente], onDelete: Cascade, onUpdate: NoAction, map: "FK_Conjuge_1")
 
   @@id([id_cliente, cpf])
+  @@map("Conjuge")
 }
 
 model corretor {
@@ -206,6 +209,8 @@ model cliente {
   comprador                  comprador?
   conjuge                    conjuge[]
   proprietario               proprietario?
+
+  @@map("Cliente")
 }
 
 enum terreno_zona {

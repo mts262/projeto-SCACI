@@ -3,6 +3,7 @@ import prisma from "./database.js";
 import clienteRoutes from "./cliente/clienteRoutes.js";
 import corretorRoutes from "./corretor/corretorRoutes.js";
 import funcionarioRoutes from "./funcionario/funcionarioRoutes.js"
+import compradorRoutes from "./comprador/compradorRoutes.js";
 import cors from "cors";
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(clienteRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use(corretorRoutes);
 app.use(funcionarioRoutes);
+app.use(compradorRoutes);
 
 app.listen(3000, async () => {
     console.log("Servidor rodando na porta 3000");
