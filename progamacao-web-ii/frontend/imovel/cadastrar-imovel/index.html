@@ -109,34 +109,21 @@
         <!-- Seção do casa/apartamento (Oculta por padrão) -->
          <div id="casa-ape-fields" hidden>
             <div class="field">
-              <input
-                type="text"
-                id="valorIptuAnual"
-                name="valorIptuAnual"
-                placeholder="Valor Anual do IPTU"
-                inputmode="numeric">
+              <input type="text" id="valorIptuAnual" name="valorIptuAnual" placeholder="Valor Anual do IPTU" inputmode="numeric" aria-describedby="valorIptuAnual-error">
+              <span class="error" id="valorIptuAnual-error"></span>
             </div>
 
             <div class="field date-field">
               <span class="calendar-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </span>
-              <input
-                type="text"
-                id="dataUltimoIptu"
-                name="dataUltimoIptu"
-                placeholder="Data do Último IPTU"
-                onfocus="(this.type='date')"
-                onblur="if(!this.value)this.type='text'">
+              <input type="text" id="dataUltimoIptu" name="dataUltimoIptu" placeholder="Data do Último IPTU" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'">
+              <span class="error" id="dataUltimoIptu-error"></span>
             </div>
 
             <div class="field">
-              <input
-                type="text"
-                id="valorCondominio"
-                name="valorCondominio"
-                placeholder="Valor do Condomínio (opcional)"
-                inputmode="numeric">
+              <input type="text" id="valorCondominio" name="valorCondominio" placeholder="Valor do Condomínio (opcional)" inputmode="numeric" aria-describedby="valorCondominio-error">
+              <span class="error" id="valorCondominio-error"></span>
             </div>
           </div>
 

@@ -136,7 +136,8 @@ function validarProprietario() {
 }
 
 // =====================================================
-// MÁSCARA E VALIDAÇÃO DE DINHEIRO (venda, mínimo de venda, cotação)
+// MÁSCARA E VALIDAÇÃO DE DINHEIRO
+// (venda, mínimo de venda, cotação, IPTU anual, condomínio)
 // =====================================================
 const formatarDinheiro = (n) =>
   n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -146,11 +147,14 @@ function dinheiroParaNumero(texto) {
   return centavos ? Number(centavos) / 100 : 0;
 }
 
-// As três colunas são DECIMAL(10,2): até 99.999.999,99
+// Limites realistas. Confira com as colunas do schema (DECIMAL) de cada tabela.
+// permiteZero: IPTU isento e condomínio zerado são valores válidos
 const CAMPOS_DINHEIRO = {
-  saleValue:      { max: 99999999.99, rotulo: 'Valor de venda' },
-  minSaleValue:   { max: 99999999.99, rotulo: 'Valor mínimo de venda' },
-  appraisalValue: { max: 99999999.99, rotulo: 'Cotação' }
+  saleValue:       { max: 99999999.99, rotulo: 'Valor de venda' },
+  minSaleValue:    { max: 99999999.99, rotulo: 'Valor mínimo de venda' },
+  appraisalValue:  { max: 99999999.99, rotulo: 'Cotação' },
+  valorIptuAnual:  { max: 9999999.99,  rotulo: 'IPTU anual', permiteZero: true },
+  valorCondominio: { max: 999999.99,   rotulo: 'Condomínio', permiteZero: true }
 };
 
 const saleValueInput = document.getElementById('saleValue');
@@ -159,13 +163,13 @@ const minSaleValueInput = document.getElementById('minSaleValue');
 function validarDinheiro(id) {
   const input = document.getElementById(id);
   const erro = document.getElementById(`${id}-error`);
-  const { max, rotulo } = CAMPOS_DINHEIRO[id];
+  const { max, rotulo, permiteZero } = CAMPOS_DINHEIRO[id];
   const numero = dinheiroParaNumero(input.value);
   let mensagem = '';
 
   if (digits(input.value) === '') {
-    mensagem = ''; // vazio: o "required" cuida do valor de venda; os outros são opcionais
-  } else if (numero <= 0) {
+    mensagem = ''; // vazio: o "required" decide se é obrigatório
+  } else if (numero < 0 || (numero === 0 && !permiteZero)) {
     mensagem = 'Informe um valor maior que zero.';
   } else if (numero > max) {
     mensagem = `${rotulo} máximo: R$ ${formatarDinheiro(max)}`;
@@ -239,36 +243,81 @@ totalAreaInput.addEventListener('input', () => {
 totalAreaInput.addEventListener('blur', validarArea);
 
 // =====================================================
-// DATA DE DISPONIBILIDADE (opcional; pode ser passada ou futura)
+// CAMPOS DE DATA (uma função para todas)
+// regra: 'futura'  = não aceita data passada
+//        'passada' = não aceita data futura
+//        'qualquer' = só confere o ano com 4 dígitos
 // =====================================================
-const availabilityInput = document.getElementById('availabilityDate');
-const availabilityError = document.getElementById('availabilityDate-error');
-
-function calcularErroDisponibilidade() {
-  const valor = availabilityInput.value; // AAAA-MM-DD, ou '' se incompleto
-
-  if (!valor || availabilityInput.type !== 'date') return '';
-
-  const ano = Number(valor.split('-')[0]);
-  if (ano < 1000) return 'Informe o ano com 4 dígitos.';
-  return '';
+function hojeISO() {
+  const agora = new Date();
+  // Usa a data local (toISOString usaria UTC e poderia dar o dia errado à noite)
+  const ano = agora.getFullYear();
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  const dia = String(agora.getDate()).padStart(2, '0');
+  return `${ano}-${mes}-${dia}`;
 }
 
-// mostrar = false: só marca o campo como inválido, sem exibir a mensagem
-function validarDisponibilidade(mostrar = true) {
-  const mensagem = calcularErroDisponibilidade();
+function configurarData({ id, errorId, regra }) {
+  const input = document.getElementById(id);
+  const erro = document.getElementById(errorId);
 
-  availabilityInput.setCustomValidity(mensagem);
-  availabilityError.textContent = mostrar ? mensagem : '';
-  return mensagem;
+  function calcularErro() {
+    const valor = input.value; // AAAA-MM-DD, ou '' se incompleto
+
+    if (!valor || input.type !== 'date') return '';
+
+    const ano = Number(valor.split('-')[0]);
+
+    if (ano < 1000) return 'Informe o ano com 4 dígitos.';
+    if (regra === 'futura' && valor < hojeISO()) return 'A data não pode ser passada.';
+    if (regra === 'passada' && valor > hojeISO()) return 'A data não pode ser futura.';
+    return '';
+  }
+
+  // mostrar = false: só marca o campo como inválido, sem exibir a mensagem
+  function validar(mostrar = true) {
+    const mensagem = calcularErro();
+
+    input.setCustomValidity(mensagem);
+    erro.textContent = mostrar ? mensagem : '';
+    return mensagem;
+  }
+
+  // Limites do seletor de datas (quando o campo vira "date", no foco)
+  input.addEventListener('focus', () => {
+    if (regra === 'futura') input.min = hojeISO();
+    if (regra === 'passada') input.max = hojeISO();
+  });
+
+  // Durante a digitação: valida em silêncio, sem mensagem nem balão
+  input.addEventListener('input', () => validar(false));
+  input.addEventListener('change', () => validar(false));
+
+  // Ao sair do campo: agora sim mostra a mensagem
+  input.addEventListener('blur', () => validar(true));
+
+  return { input, validar };
 }
 
-// Durante a digitação: valida em silêncio, sem mensagem nem balão
-availabilityInput.addEventListener('input', () => validarDisponibilidade(false));
-availabilityInput.addEventListener('change', () => validarDisponibilidade(false));
+const prazoVenda = configurarData({
+  id: 'saleDeadline',
+  errorId: 'saleDeadline-error',
+  regra: 'futura'
+});
 
-// Ao sair do campo: agora sim mostra a mensagem
-availabilityInput.addEventListener('blur', () => validarDisponibilidade(true));
+const disponibilidade = configurarData({
+  id: 'availabilityDate',
+  errorId: 'availabilityDate-error',
+  regra: 'qualquer'
+});
+
+const ultimoIptu = configurarData({
+  id: 'dataUltimoIptu',
+  errorId: 'dataUltimoIptu-error',
+  regra: 'passada'
+});
+
+const camposData = [prazoVenda, disponibilidade, ultimoIptu];
 
 // =====================================================
 // CEP (máscara, validação e preenchimento automático)
@@ -418,25 +467,43 @@ const uploadMatricula = configurarUpload({
 });
 
 // =====================================================
-// Campos específicos conforme o tipo de imóvel
+// CAMPOS ESPECÍFICOS CONFORME O TIPO DE IMÓVEL
 // =====================================================
 const propertyType = document.getElementById('propertyType');
 const terrenoFields = document.getElementById('terreno-fields');
 const casaApeFields = document.getElementById('casa-ape-fields');
 
-function atualizarCamposTipoImovel() {
-  const tipo = propertyType.value;
-
-  terrenoFields.hidden = tipo !== 'terreno';
-  casaApeFields.hidden = tipo !== 'casa_ape';
-
-  terrenoFields.querySelectorAll('input, select').forEach(campo => {
-    campo.required = tipo === 'terreno';
+// Zera um grupo que ficou escondido: valores, erros e validade.
+// Sem isso, um erro pendente num campo escondido trava o envio sem aviso.
+function limparGrupo(grupo) {
+  grupo.querySelectorAll('input, select').forEach((campo) => {
+    campo.value = '';
+    campo.required = false;
+    campo.setCustomValidity('');
+    if (campo.type === 'date') campo.type = 'text';
   });
 
-  casaApeFields.querySelectorAll('input, select').forEach(campo => {
-    campo.required = tipo === 'casa_ape' &&
-      campo.id !== 'valorCondominio';
+  grupo.querySelectorAll('.error').forEach((span) => { span.textContent = ''; });
+}
+
+function atualizarCamposTipoImovel() {
+  const tipo = propertyType.value;
+  const ehTerreno = tipo === 'terreno';
+  const ehCasaApe = tipo === 'casa_ape';
+
+  terrenoFields.hidden = !ehTerreno;
+  casaApeFields.hidden = !ehCasaApe;
+
+  if (!ehTerreno) limparGrupo(terrenoFields);
+  if (!ehCasaApe) limparGrupo(casaApeFields);
+
+  // Obrigatórios só no grupo visível (o condomínio é sempre opcional)
+  terrenoFields.querySelectorAll('input, select').forEach((campo) => {
+    campo.required = ehTerreno;
+  });
+
+  casaApeFields.querySelectorAll('input, select').forEach((campo) => {
+    campo.required = ehCasaApe && campo.id !== 'valorCondominio';
   });
 }
 
@@ -452,9 +519,9 @@ form.addEventListener('submit', async (e) => {
   // Roda todas as validações, para os erros aparecerem mesmo
   // se a pessoa não passou por algum campo
   validarProprietario();
-  Object.keys(CAMPOS_DINHEIRO).forEach(validarDinheiro);
+  Object.keys(CAMPOS_DINHEIRO).forEach((id) => validarDinheiro(id));
   validarArea();
-  validarDisponibilidade();
+  camposData.forEach((campo) => campo.validar());
   validarCep();
 
   if (!uploadPosse.input.files[0]) {
@@ -501,6 +568,7 @@ form.addEventListener('submit', async (e) => {
       formData.append(campo, valor ?? '');
     }
 
+    // Proprietário
     formData.append('id_proprietario', ownerIdInput.value);
     formData.append('prazo_venda', form.elements.saleDeadline.value || '');
     formData.append('observacao_proprietario', form.elements.ownerNotes.value.trim());
@@ -513,18 +581,13 @@ form.addEventListener('submit', async (e) => {
     } else if (propertyType.value === 'casa_ape') {
       formData.append(
         'valor_iptu_anual',
-        areaParaNumero(form.elements.valorIptuAnual.value)
+        dinheiroParaNumero(form.elements.valorIptuAnual.value)
       );
-
-      formData.append(
-        'data_ultimo_iptu',
-        form.elements.dataUltimoIptu.value
-      );
-
+      formData.append('data_ultimo_iptu', form.elements.dataUltimoIptu.value);
       formData.append(
         'valor_condominio',
-        form.elements.valorCondominio.value.trim()
-          ? areaParaNumero(form.elements.valorCondominio.value)
+        digits(form.elements.valorCondominio.value)
+          ? dinheiroParaNumero(form.elements.valorCondominio.value)
           : ''
       );
     }
@@ -552,14 +615,14 @@ form.addEventListener('submit', async (e) => {
 
     // Limpeza completa depois do cadastro
     form.reset();
-    atualizarCamposTipoImovel();
     form.querySelectorAll('input, select').forEach((el) => el.setCustomValidity(''));
     document.querySelectorAll('.error').forEach((span) => { span.textContent = ''; });
     ownerIdInput.value = '';
     fecharLista();
     uploadPosse.limpar();
     uploadMatricula.limpar();
-    availabilityInput.type = 'text';
+    camposData.forEach((campo) => { campo.input.type = 'text'; });
+    atualizarCamposTipoImovel();
 
   } catch (error) {
     console.error('Erro na requisição:', error);
