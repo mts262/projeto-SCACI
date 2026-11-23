@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1c1c1b">
+  <title>Cadastrar Imóvel | S.C.A.C.I.</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../../shared/styles.css">
+</head>
+<body>
+  <header class="brand" aria-label="S.C.A.C.I."><span>S.C.A.</span><span>C.I.</span></header>
+
+  <aside class="sidebar">
+    <div class="menu-title">Menu</div>
+    <nav>
+      <button type="button" data-section="Início">Início</button>
+      <button type="button" data-section="Clientes">Clientes</button>
+      <button type="button" data-section="Compradores">Compradores</button>
+      <button type="button" data-section="Imóveis" class="active" aria-current="page">Imóveis</button>
+      <button type="button" data-section="Vendas">Vendas</button>
+      <button type="button" data-section="Agenda de Visita">Agenda de Visita</button>
+      <button type="button" data-section="Funcionários">Funcionários</button>
+      <button type="button" data-section="Corretores">Corretores</button>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="breadcrumb">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <ol>
+        <li>Início</li>
+        <li>Cadastrar Imóvel</li>
+      </ol>
+    </div>
+
+    <div class="content">
+      <h1>Cadastrar <span>Imóvel</span></h1>
+
+      <form id="property-form" novalidate>
+        <div class="form-body">
+
+          <!-- Proprietário (busca por nome ou CPF) -->
+          <div class="field combobox">
+            <input
+              id="owner"
+              name="ownerSearch"
+              placeholder="Proprietário (digite o nome ou CPF)"
+              autocomplete="off"
+              required
+              maxlength="100"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded="false"
+              aria-controls="owner-list"
+              aria-describedby="owner-error">
+            <input type="hidden" id="ownerId" name="ownerId">
+            <ul id="owner-list" class="combobox-list" role="listbox" hidden></ul>
+            <span class="error" id="owner-error"></span>
+          </div>
+
+          <div class="field date-field">
+            <span class="calendar-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </span>
+            <input type="text" id="saleDeadline" name="saleDeadline" placeholder="Prazo de venda" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'">
+            <span class="error" id="saleDeadline-error"></span>
+          </div>
+
+          <div class="field">
+            <input
+              id="ownerNotes"
+              name="ownerNotes"
+              placeholder="Observação do Proprietário"
+              maxlength="255">
+          </div>
+
+          <div class="field">
+            <select id="propertyType" name="propertyType" required>
+              <option value="" disabled selected hidden>Tipo de imóvel...</option>
+              <option value="casa_ape">Casa</option>
+              <option value="casa_ape">Apartamento</option>
+              <option value="terreno">Terreno</option>
+            </select>
+          </div>
+
+          <!-- Seção do Terreno (Oculta por padrão) -->
+          <div id="terreno-fields" hidden>
+          <div class="field">
+            <select id="zona" name="zona">
+              <option value="" disabled selected hidden>Zona do Terreno</option>
+              <option value="rural">Rural</option>
+              <option value="urbana">Urbana</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <select id="tipoTerreno" name="tipoTerreno">
+              <option value="" disabled selected hidden>Tipo de Terreno</option>
+              <option value="rural">Rural</option>
+              <option value="loteamento">Loteamento</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Seção do casa/apartamento (Oculta por padrão) -->
+         <div id="casa-ape-fields" hidden>
+            <div class="field">
+              <input type="text" id="valorIptuAnual" name="valorIptuAnual" placeholder="Valor Anual do IPTU" inputmode="numeric" aria-describedby="valorIptuAnual-error">
+              <span class="error" id="valorIptuAnual-error"></span>
+            </div>
+
+            <div class="field date-field">
+              <span class="calendar-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </span>
+              <input type="text" id="dataUltimoIptu" name="dataUltimoIptu" placeholder="Data do Último IPTU" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'">
+              <span class="error" id="dataUltimoIptu-error"></span>
+            </div>
+
+            <div class="field">
+              <input type="text" id="valorCondominio" name="valorCondominio" placeholder="Valor do Condomínio (opcional)" inputmode="numeric" aria-describedby="valorCondominio-error">
+              <span class="error" id="valorCondominio-error"></span>
+            </div>
+          </div>
+
+          <div class="field">
+            <input id="registrationNumber" name="registrationNumber" placeholder="Matrícula do Imóvel" required maxlength="30">
+          </div>
+
+          <div class="field">
+            <input id="iptuNumber" name="iptuNumber" placeholder="Inscrição do IPTU" required maxlength="20">
+          </div>
+
+          <div class="field">
+            <input id="legalStatus" name="legalStatus" placeholder="Situação Legal" required maxlength="50">
+          </div>
+
+          <div class="field">
+            <input id="propertyDescription" name="propertyDescription" placeholder="Descrição do Imóvel" maxlength="255">
+          </div>
+
+          <div class="field">
+            <input id="totalArea" name="totalArea" placeholder="Área Total (m²)" inputmode="decimal" aria-describedby="totalArea-error">
+            <span class="error" id="totalArea-error"></span>
+          </div>
+
+          <div class="field date-field">
+            <span class="calendar-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </span>
+            <input type="text" id="availabilityDate" name="availabilityDate" placeholder="Data de Disponibilidade" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'">
+            <span class="error" id="availabilityDate-error"></span>
+          </div>
+
+          <!-- Valores -->
+          <div class="field">
+            <input id="saleValue" name="saleValue" placeholder="Valor de Venda" inputmode="numeric" required aria-describedby="saleValue-error">
+            <span class="error" id="saleValue-error"></span>
+          </div>
+
+          <div class="field">
+            <input id="minSaleValue" name="minSaleValue" placeholder="Valor Mínimo de Venda" inputmode="numeric" aria-describedby="minSaleValue-error">
+            <span class="error" id="minSaleValue-error"></span>
+          </div>
+
+          <div class="field">
+            <input id="appraisalValue" name="appraisalValue" placeholder="Cotação do Imóvel" inputmode="numeric" aria-describedby="appraisalValue-error">
+            <span class="error" id="appraisalValue-error"></span>
+          </div>
+
+          <div class="field">
+            <input id="notes" name="notes" placeholder="Observação do imóvel" maxlength="255">
+          </div>
+
+          <!-- Endereço -->
+          <div class="cep-row">
+            <div class="field">
+              <input id="postalCode" name="postalCode" placeholder="CEP" autocomplete="postal-code" inputmode="numeric" required maxlength="9" aria-describedby="postal-error">
+              <span class="error" id="postal-error"></span>
+            </div>
+            <div class="field">
+              <input id="complement" name="complement" placeholder="Complemento" maxlength="50">
+            </div>
+          </div>
+
+          <div class="field">
+            <input id="street" name="street" placeholder="Logradouro" autocomplete="address-line1" required maxlength="100">
+          </div>
+
+          <div class="address-row">
+            <div class="field">
+              <input id="number" name="number" placeholder="Nº" required maxlength="10">
+            </div>
+            <div class="field">
+              <input id="neighborhood" name="neighborhood" placeholder="Bairro" required maxlength="100">
+            </div>
+          </div>
+
+          <div class="city-row">
+            <div class="field">
+              <input id="city" name="city" placeholder="Cidade" autocomplete="address-level2" required maxlength="100">
+            </div>
+            <div class="field">
+              <select id="state" name="state" autocomplete="address-level1" required aria-label="UF">
+                <option value="" disabled selected hidden>UF</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Documentos -->
+          <div class="field">
+            <div class="upload" id="possession-drop-zone">
+              <span id="possession-file-name">Comprovante de Posse, clique para fazer upload ou arraste o arquivo aqui (PDF, PNG, JPG)</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <input type="file" id="possessionProof" accept="application/pdf,image/png,image/jpeg" required aria-describedby="possession-file-error">
+            </div>
+            <span class="error" id="possession-file-error" role="alert"></span>
+          </div>
+
+          <div class="field">
+            <div class="upload" id="registry-drop-zone">
+              <span id="registry-file-name">Certidão de Matrícula, clique para fazer upload ou arraste o arquivo aqui (PDF, PNG, JPG)</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 14v4a2 2 0 002 2h12a2 2 0 002-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <input type="file" id="registryCertificate" accept="application/pdf,image/png,image/jpeg" required aria-describedby="registry-file-error">
+            </div>
+            <span class="error" id="registry-file-error" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="save-area">
+          <p id="save-status" role="status" aria-live="polite"></p>
+          <button class="save-button" type="submit">Salvar Cadastro</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <dialog id="navigation-dialog">
+    <p id="navigation-message"></p>
+    <form method="dialog">
+      <button>OK</button>
+    </form>
+  </dialog>
+
+  <script src="../../shared/nav.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
