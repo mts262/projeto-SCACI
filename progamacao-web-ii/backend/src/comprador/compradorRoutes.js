@@ -3,7 +3,7 @@ import {
   cadastrarComprador,
   //editarComprador,
   excluirComprador,
-  //pesquisarComprador,
+  pesquisarComprador,
   //buscarCompradorPorID
 } from "./compradorController.js";
 import { uploadComprovanteRenda } from "../middlewares/upload.js";
@@ -31,7 +31,7 @@ router.post("/comprador", (req, res, next) => {
 }, cadastrarComprador);
 
 // Listar / Pesquisar todos os compradores
-//router.get("/compradores", pesquisarComprador);
+router.get("/compradores", pesquisarComprador);
 
 // Buscar um comprador por ID
 //router.get("/comprador/:id_comprador", buscarCompradorPorID);

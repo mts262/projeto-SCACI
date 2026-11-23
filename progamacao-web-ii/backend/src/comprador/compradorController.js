@@ -137,6 +137,59 @@ async function cadastrarComprador(req, res) {
 }
 
 /**
+ * Lista compradores e pesquisa pelo nome ou CPF/CNPJ do cliente associado.
+ * O parâmetro opcional req.query.q contém o texto digitado na tela de pesquisa.
+ */
+async function pesquisarComprador(req, res) {
+    const consulta = req.query.q;
+    if (consulta !== undefined && typeof consulta !== "string") {
+        return res.status(400).json({ erro: "Informe apenas um texto para a pesquisa." });
+    }
+
+    const termo = consulta?.trim();
+    const where = {};
+    if (termo) {
+        const filtros = [{ nome: { contains: termo } }];
+        const documento = termo.replace(/\D/g, "");
+        if (documento) {
+            filtros.push({ cpf_cnpj: { contains: documento } });
+        }
+        where.cliente = { is: { OR: filtros } };
+    }
+
+    try {
+        const compradores = await prisma.comprador.findMany({
+            where,
+            select: {
+                id_cliente: true,
+                cliente: {
+                    select: {
+                        nome: true,
+                        cpf_cnpj: true,
+                        email: true
+                    }
+                }
+            },
+            orderBy: { id_cliente: "desc" }
+        });
+
+        const resultado = compradores.map(({ id_cliente, cliente }) => ({
+            // A tela usa id_comprador nas ações; no banco, a chave é id_cliente.
+            id_comprador: id_cliente,
+            id_cliente,
+            nome: cliente.nome,
+            cpf_cnpj: cliente.cpf_cnpj,
+            email: cliente.email ?? ""
+        }));
+
+        return res.status(200).json(resultado);
+    } catch (erro) {
+        console.error("Erro ao pesquisar compradores:", erro);
+        return res.status(500).json({ erro: "Não foi possível pesquisar os compradores." });
+    }
+}
+
+/**
  * @author Davi Oliveira Ferreira Santos
  *
  * Exclui um comprador do banco de dados pelo seu ID.
@@ -185,6 +238,6 @@ export {
     cadastrarComprador,
     //editarComprador,
     excluirComprador,
-    //pesquisarComprador,
+    pesquisarComprador,
     //buscarCompradorPorID 
   };
