@@ -52,3 +52,126 @@ Content-Type: application/json
 {
   "nome": " "
 }
+
+### Teste 8: Buscar comprador por ID (id_cliente) - Sucesso
+GET http://localhost:3000/comprador/1
+
+### Teste 9: Buscar comprador por ID - Inexistente
+GET http://localhost:3000/comprador/999999
+
+### Teste 10: Editar comprador - Sucesso (sem trocar o comprovante)
+PUT http://localhost:3000/comprador/1
+Content-Type: application/json
+
+{
+  "renda_mensal": "5500.00",
+  "profissao": "Analista de Sistemas",
+  "forma_pagamento": "prazo",
+  "tipo_imovel_desejado": "Apartamento",
+  "faixa_valor_min": "200000.00",
+  "faixa_valor_max": "350000.00",
+  "prazo_compra": "2027-12-31",
+  "descricao_desejada": "2 quartos",
+  "area_minima_desejada": "60",
+  "localizacao_desejada": "Centro"
+}
+
+### Teste 11: Editar comprador - Forma de pagamento inválida
+PUT http://localhost:3000/comprador/1
+Content-Type: application/json
+
+{
+  "renda_mensal": "5500.00",
+  "forma_pagamento": "cartao"
+}
+
+### Teste 12: Editar comprador - ID não numérico
+PUT http://localhost:3000/comprador/abc
+Content-Type: application/json
+
+{}
+
+### Teste 13: Pesquisar imóveis - Todos
+GET http://localhost:3000/imoveis
+
+### Teste 14: Pesquisar imóveis - Por matrícula, proprietário, bairro ou cidade
+GET http://localhost:3000/imoveis?q=Centro
+
+### Teste 15: Buscar imóvel por ID - Sucesso
+GET http://localhost:3000/imovel/1
+
+### Teste 16: Buscar imóvel por ID - Inexistente
+GET http://localhost:3000/imovel/999999
+
+### Teste 17: Editar imóvel - Casa/Apartamento (sem trocar arquivos)
+PUT http://localhost:3000/imovel/1
+Content-Type: application/json
+
+{
+  "tipo_imovel": "casa_ape",
+  "matricula_imovel": "MAT-0001",
+  "inscricao_iptu": "IPTU-0001",
+  "situacao_legal": "Regular",
+  "descricao_imovel": "Casa com 3 quartos",
+  "area_total": "180.50",
+  "data_disponibilidade": "2027-01-10",
+  "valor_venda": "450000.00",
+  "valor_minimo_venda": "420000.00",
+  "cotacao_imovel": "440000.00",
+  "observacao": "Aceita financiamento",
+  "cep": "45000000",
+  "logradouro": "Rua A",
+  "numero": "100",
+  "complemento": "Casa",
+  "bairro": "Centro",
+  "cidade": "Vitória da Conquista",
+  "uf": "BA",
+  "id_proprietario": "1",
+  "prazo_venda": "2027-06-30",
+  "observacao_proprietario": "Prefere contato por WhatsApp",
+  "valor_iptu_anual": "1200.00",
+  "data_ultimo_iptu": "2026-02-10",
+  "valor_condominio": ""
+}
+
+### Teste 18: Editar imóvel - Trocar tipo para terreno
+PUT http://localhost:3000/imovel/1
+Content-Type: application/json
+
+{
+  "tipo_imovel": "terreno",
+  "matricula_imovel": "MAT-0001",
+  "inscricao_iptu": "IPTU-0001",
+  "situacao_legal": "Regular",
+  "valor_venda": "150000.00",
+  "cep": "45000000",
+  "logradouro": "Rua A",
+  "numero": "100",
+  "bairro": "Centro",
+  "cidade": "Vitória da Conquista",
+  "uf": "BA",
+  "id_proprietario": "1",
+  "zona": "urbana",
+  "tipo_terreno": "loteamento"
+}
+
+### Teste 19: Editar imóvel - Valor mínimo maior que o valor de venda
+PUT http://localhost:3000/imovel/1
+Content-Type: application/json
+
+{
+  "tipo_imovel": "terreno",
+  "matricula_imovel": "MAT-0001",
+  "inscricao_iptu": "IPTU-0001",
+  "situacao_legal": "Regular",
+  "valor_venda": "100.00",
+  "valor_minimo_venda": "200.00",
+  "cep": "45000000",
+  "logradouro": "Rua A",
+  "numero": "100",
+  "bairro": "Centro",
+  "cidade": "Vitória da Conquista",
+  "uf": "BA",
+  "zona": "urbana",
+  "tipo_terreno": "loteamento"
+}

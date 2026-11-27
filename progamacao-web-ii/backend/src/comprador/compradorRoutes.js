@@ -1,17 +1,17 @@
 import express from "express";
 import {
   cadastrarComprador,
-  //editarComprador,
+  editarComprador,
   excluirComprador,
   pesquisarComprador,
-  //buscarCompradorPorID
+  buscarCompradorPorID
 } from "./compradorController.js";
 import { uploadComprovanteRenda } from "../middlewares/upload.js";
 
 const router = express.Router();
 
-// Cadastrar comprador
-router.post("/comprador", (req, res, next) => {
+// Recebe o comprovante de renda (multipart) e traduz os erros do multer em respostas HTTP
+function receberComprovanteRenda(req, res, next) {
   uploadComprovanteRenda(req, res, (erro) => {
     if (!erro) {
       return next();
@@ -28,16 +28,19 @@ router.post("/comprador", (req, res, next) => {
     console.error("Erro ao receber comprovante de renda:", erro);
     return res.status(500).json({ erro: "Não foi possível receber o comprovante de renda." });
   });
-}, cadastrarComprador);
+}
+
+// Cadastrar comprador
+router.post("/comprador", receberComprovanteRenda, cadastrarComprador);
 
 // Listar / Pesquisar todos os compradores
 router.get("/compradores", pesquisarComprador);
 
 // Buscar um comprador por ID
-//router.get("/comprador/:id_comprador", buscarCompradorPorID);
+router.get("/comprador/:id_comprador", buscarCompradorPorID);
 
 // Editar comprador por ID
-//router.put("/comprador/:id_comprador", editarComprador);
+router.put("/comprador/:id_comprador", receberComprovanteRenda, editarComprador);
 
 // Excluir comprador por ID
 router.delete("/comprador/:id_comprador", excluirComprador);

@@ -4,6 +4,7 @@ import clienteRoutes from "./cliente/clienteRoutes.js";
 import corretorRoutes from "./corretor/corretorRoutes.js";
 import funcionarioRoutes from "./funcionario/funcionarioRoutes.js"
 import compradorRoutes from "./comprador/compradorRoutes.js";
+import imovelRoutes from "./imovel/imovelRoutes.js";
 import cors from "cors";
 
 const app = express();
@@ -18,6 +19,7 @@ app.use("/uploads", express.static("uploads"));
 app.use(corretorRoutes);
 app.use(funcionarioRoutes);
 app.use(compradorRoutes);
+app.use(imovelRoutes);
 
 app.listen(3000, async () => {
     console.log("Servidor rodando na porta 3000");
