@@ -206,9 +206,10 @@ async function excluirComprador(req, res) {
     }
 
     try {
+        // No banco, a chave do comprador é o id_cliente do cliente associado.
         const comprador = await prisma.comprador.findUnique({
             where: {
-                id_comprador: id
+                id_cliente: id
             }
         });
 
@@ -218,7 +219,7 @@ async function excluirComprador(req, res) {
 
         await prisma.comprador.delete({
             where: {
-                id_comprador: id
+                id_cliente: id
             }
         });
 
