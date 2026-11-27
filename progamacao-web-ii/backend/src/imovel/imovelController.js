@@ -471,4 +471,66 @@ async function editarImovel(req, res) {
     }
 }
 
-export { buscarImovelPorID, editarImovel };
+/**
+ * @author Ian
+ *
+ * Lista imóveis e pesquisa pela matrícula, nome do proprietário, bairro ou cidade.
+ * O parâmetro opcional `req.query.q` contém o texto digitado na tela de pesquisa;
+ * sem ele, todos os imóveis são retornados.
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera opcionalmente `req.query.q`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Lista de `{ id_imovel, matricula, proprietario, bairro, cidade }` ou um erro 400/500.
+ */
+async function pesquisarImovel(req, res) {
+    const consulta = req.query.q;
+    if (consulta !== undefined && typeof consulta !== "string") {
+        return res.status(400).json({ erro: "Informe apenas um texto para a pesquisa." });
+    }
+
+    const termo = consulta?.trim();
+    const where = {};
+    if (termo) {
+        where.OR = [
+            { matricula_imovel: { contains: termo } },
+            { bairro: { contains: termo } },
+            { cidade: { contains: termo } },
+            { proprietario: { is: { cliente: { is: { nome: { contains: termo } } } } } }
+        ];
+    }
+
+    try {
+        const imoveis = await prisma.imovel.findMany({
+            where,
+            select: {
+                id_imovel: true,
+                matricula_imovel: true,
+                bairro: true,
+                cidade: true,
+                tipo_imovel: true,
+                proprietario: {
+                    select: {
+                        cliente: { select: { nome: true } }
+                    }
+                }
+            },
+            orderBy: { id_imovel: "desc" }
+        });
+
+        const resultado = imoveis.map((imovel) => ({
+            id_imovel: imovel.id_imovel,
+            matricula: imovel.matricula_imovel,
+            proprietario: imovel.proprietario?.cliente?.nome ?? "",
+            bairro: imovel.bairro,
+            cidade: imovel.cidade,
+            tipo_imovel: imovel.tipo_imovel
+        }));
+
+        return res.status(200).json(resultado);
+    } catch (erro) {
+        console.error("Erro ao pesquisar imóveis:", erro);
+        return res.status(500).json({ erro: "Não foi possível pesquisar os imóveis." });
+    }
+}
+
+export { buscarImovelPorID, editarImovel, pesquisarImovel };
