@@ -6,7 +6,7 @@ const statusMsg = document.querySelector('#save-status');
 
 // O id do comprador é o id do cliente (chave primária da tabela Comprador)
 const parametros = new URLSearchParams(window.location.search);
-const id_cliente = parametros.get('id') || parametros.get('id_cliente');
+const id_cliente = parametros.get('id') || parametros.get('id_comprador') || parametros.get('id_cliente');
 
 const API = 'http://localhost:3000';
 
