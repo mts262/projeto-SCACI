@@ -234,10 +234,165 @@ async function excluirComprador(req, res) {
     }
 }
 
-export { 
+/**
+ * @author Ian
+ *
+ * Converte o parâmetro de rota em um ID de comprador válido.
+ * No banco, o comprador é identificado pelo id_cliente do cliente associado.
+ *
+ * @param {string} parametro - Valor recebido em `req.params`.
+ * @returns {number|null} O ID numérico ou null se for inválido.
+ */
+function obterIdComprador(parametro) {
+    if (!/^\d+$/.test(String(parametro ?? ""))) {
+        return null;
+    }
+    const id = Number(parametro);
+    return id >= 1 && id <= 4_294_967_295 ? id : null;
+}
+
+/**
+ * @author Ian
+ *
+ * Converte a URL pública de um comprovante de renda no caminho do arquivo em disco.
+ *
+ * @param {string} url - URL salva em `url_comprovante_renda`.
+ * @returns {string|null} Caminho relativo do arquivo ou null se a URL não for de upload local.
+ */
+function caminhoComprovantePorUrl(url) {
+    const prefixo = "http://localhost:3000/uploads/comprovantes-renda/";
+    if (typeof url !== "string" || !url.startsWith(prefixo)) {
+        return null;
+    }
+    const nomeArquivo = url.slice(prefixo.length);
+    if (!nomeArquivo || nomeArquivo.includes("/") || nomeArquivo.includes("\\") || nomeArquivo.includes("..")) {
+        return null;
+    }
+    return `uploads/comprovantes-renda/${nomeArquivo}`;
+}
+
+/**
+ * @author Ian
+ *
+ * Busca um único comprador pelo seu ID (id_cliente), junto com os dados básicos do cliente.
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id_comprador` ou `req.params.id`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna os dados do comprador encontrado ou um erro 400/404/500.
+ */
+async function buscarCompradorPorID(req, res) {
+    const id = obterIdComprador(req.params.id_comprador ?? req.params.id);
+    if (id === null) {
+        return res.status(400).json({ erro: "O ID fornecido deve ser um número válido." });
+    }
+
+    try {
+        const comprador = await prisma.comprador.findUnique({
+            where: { id_cliente: id },
+            include: {
+                cliente: {
+                    select: {
+                        nome: true,
+                        cpf_cnpj: true,
+                        email: true
+                    }
+                }
+            }
+        });
+
+        if (!comprador) {
+            return res.status(404).json({ erro: "Comprador não encontrado!" });
+        }
+
+        return res.status(200).json({ ...comprador, id_comprador: comprador.id_cliente });
+    } catch (erro) {
+        console.error("Erro ao buscar comprador por ID:", erro);
+        return res.status(500).json({
+            erro: "Erro interno ao buscar o comprador.",
+            detalhes: erro.message
+        });
+    }
+}
+
+/**
+ * @author Ian
+ *
+ * Edita os dados de um comprador. O cliente associado não pode ser trocado:
+ * o id_cliente vem sempre do parâmetro da rota. O comprovante de renda é opcional;
+ * se um novo arquivo for enviado, ele substitui o anterior, que é apagado do disco.
+ *
+ * @param {Object} req - Objeto de requisição do Express (espera `req.params.id_comprador`, `req.body` e opcionalmente `req.file`).
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {Promise<Object>} Retorna o comprador atualizado ou um erro 400/404/500.
+ */
+async function editarComprador(req, res) {
+    let atualizado = false;
+    try {
+        const id = obterIdComprador(req.params.id_comprador ?? req.params.id);
+        if (id === null) {
+            return res.status(400).json({ erro: "O ID fornecido deve ser um número válido." });
+        }
+
+        if (req.file && req.file.size === 0) {
+            return res.status(400).json({ erro: "O comprovante de renda enviado está vazio." });
+        }
+
+        const corpo = req.body && typeof req.body === "object" && !Array.isArray(req.body) ? req.body : null;
+        const { dados, erro } = validarDadosComprador(corpo && { ...corpo, id_cliente: String(id) });
+        if (erro) {
+            return res.status(400).json({ erro });
+        }
+
+        const compradorExistente = await prisma.comprador.findUnique({
+            where: { id_cliente: id },
+            select: { url_comprovante_renda: true }
+        });
+        if (!compradorExistente) {
+            return res.status(404).json({ erro: "Comprador não encontrado!" });
+        }
+
+        // O cliente associado é fixo: id_cliente não entra nos dados atualizados.
+        const { id_cliente, ...dadosAtualizados } = dados;
+        if (req.file) {
+            dadosAtualizados.url_comprovante_renda =
+                `http://localhost:3000/uploads/comprovantes-renda/${req.file.filename}`;
+        }
+
+        const comprador = await prisma.comprador.update({
+            where: { id_cliente: id },
+            data: dadosAtualizados
+        });
+        atualizado = true;
+
+        if (req.file) {
+            const caminhoAntigo = caminhoComprovantePorUrl(compradorExistente.url_comprovante_renda);
+            if (caminhoAntigo) {
+                await removerComprovanteRenda({ path: caminhoAntigo });
+            }
+        }
+
+        return res.status(200).json({ comprador });
+    } catch (erro) {
+        if (erro.code === "P2025") {
+            return res.status(404).json({ erro: "Comprador não encontrado!" });
+        }
+
+        console.error("Erro ao editar comprador:", erro);
+        return res.status(500).json({
+            erro: "Não foi possível editar o comprador.",
+            detalhes: erro.message
+        });
+    } finally {
+        if (!atualizado) {
+            await removerComprovanteRenda(req.file);
+        }
+    }
+}
+
+export {
     cadastrarComprador,
-    //editarComprador,
+    editarComprador,
     excluirComprador,
     pesquisarComprador,
-    //buscarCompradorPorID 
+    buscarCompradorPorID
   };
