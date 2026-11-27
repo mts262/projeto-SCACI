@@ -42,24 +42,18 @@
         <form id="buyer-form" novalidate>
           <div class="form-body">
             
-            <div class="field combobox">
+            <!-- O cliente do comprador não pode ser trocado na edição -->
+            <div class="field">
               <input
                 id="client"
                 name="clientSearch"
-                placeholder="Cliente (digite o nome ou CPF)"
+                placeholder="Cliente"
                 autocomplete="off"
-                required
-                maxlength="100"
-                role="combobox"
-                aria-autocomplete="list"
-                aria-expanded="false"
-                aria-controls="client-list"
+                readonly
+                aria-readonly="true"
+                title="O cliente do comprador não pode ser alterado"
                 aria-describedby="client-error">
-              <input type="hidden" id="clientId" name="clientId">
-              <ul id="client-list" class="combobox-list" role="listbox" hidden>
-                <!-- preenchido pelo JS -->
-              </ul>
-              <span class="error" id="client-error"></span>
+              <span class="error" id="client-error" role="alert"></span>
             </div>
 
             <div class="field">
@@ -127,7 +121,7 @@
 
           <div class="save-area">
             <p id="save-status" role="status" aria-live="polite"></p>
-            <button class="save-button" type="submit">Salvar Cadastro</button>
+            <button class="save-button" type="submit">Salvar Alterações</button>
           </div>
         </form>
     </section>
