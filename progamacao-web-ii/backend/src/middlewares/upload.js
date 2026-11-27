@@ -5,7 +5,9 @@ import fs from 'node:fs';
 const diretoriosUpload = {
     comprovante_residencia: "uploads/comprovantes-residencia/",
     comprovante_uniao: "uploads/comprovantes-uniao/",
-    comprovante_renda: "uploads/comprovantes-renda/"
+    comprovante_renda: "uploads/comprovantes-renda/",
+    comprovante_posse: "uploads/comprovantes-posse/",
+    certidao_matricula: "uploads/certidoes-matricula/"
 };
 
 // Configura como e onde salvar os arquivos no disco local
@@ -51,3 +53,29 @@ export const uploadComprovanteRenda = multer({
         return cb(null, true);
     }
 }).single("comprovante_renda");
+
+// Arquivos do imóvel: comprovante de posse e certidão de matrícula (PDF, PNG ou JPG, até 5 MB cada)
+export const uploadArquivosImovel = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const extensoesPorTipo = {
+            "application/pdf": [".pdf"],
+            "image/png": [".png"],
+            "image/jpeg": [".jpg", ".jpeg"]
+        };
+        const extensoes = extensoesPorTipo[file.mimetype];
+        const extensao = path.extname(file.originalname).toLowerCase();
+
+        if (!extensoes?.includes(extensao)) {
+            const erro = new Error("Envie o comprovante de posse e a certidão de matrícula em PDF, PNG ou JPG.");
+            erro.code = "TIPO_ARQUIVO_INVALIDO";
+            return cb(erro);
+        }
+
+        return cb(null, true);
+    }
+}).fields([
+    { name: "comprovante_posse", maxCount: 1 },
+    { name: "certidao_matricula", maxCount: 1 }
+]);
